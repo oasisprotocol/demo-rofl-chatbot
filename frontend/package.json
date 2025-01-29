@@ -1,0 +1,35 @@
+{
+  "name": "@oasisprotocol/demo-rofl-chatbot-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "license": "See License in ../LICENSE",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/figtree": "^5.1.1",
+    "@fontsource-variable/roboto-mono": "^5.1.0",
+    "@material-design-icons/svg": "^0.14.13",
+    "@metamask/detect-provider": "^2.0.0",
+    "@metamask/jazzicon": "^2.0.0",
+    "@oasisprotocol/sapphire-ethers-v6": "6.0.1",
+    "buffer": "^6.0.3",
+    "ethers": "^6.10.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-responsive": "^10.0.0",
+    "react-router-dom": "^6.27.0",
+    "siwe": "^2.3.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.8",
+    "vite-plugin-svgr": "^4.2.0"
+  }
+}

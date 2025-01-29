@@ -1,0 +1,7 @@
+[submodule "contracts/lib/forge-std"]
+	path = contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "contracts/lib/sapphire-paratime"]
+	path = contracts/lib/sapphire-paratime
+	url = https://github.com/oasisprotocol/sapphire-paratime
+	tag = contracts/v0.2.12

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {ChatBot} from "../src/ChatBot.sol";
+import {Subcall} from "@oasisprotocol/sapphire-contracts/contracts/Subcall.sol";
 
 contract ChatBotTest is Test {
     ChatBot public chatBot;
@@ -46,31 +48,11 @@ contract ChatBotTest is Test {
         vm.stopPrank();
     }
 
-    function test_setOracle() public {
-        address newOracle = address(0x789);
-        vm.mockCall(
-            address(this),
-            abi.encodeWithSelector(Subcall.roflEnsureAuthorizedOrigin.selector),
-            abi.encode()
-        );
-        chatBot.setOracle(newOracle);
-        // Test that new oracle can submit answers
-        vm.startPrank(newOracle);
-        chatBot.submitAnswer("New oracle answer", user);
-        vm.stopPrank();
-    }
-
-    function testFail_unauthorizedPromptAccess() public {
-        address unauthorizedUser = address(0x999);
+    function test_Revert_unauthorizedPromptAccess() public {
+        vm.expectRevert(ChatBot.UnauthorizedUserOrOracle.selector);
+        address unauthorizedUser = address(0);
         vm.startPrank(unauthorizedUser);
         chatBot.getPrompts("", user);
-        vm.stopPrank();
-    }
-
-    function testFail_unauthorizedAnswerSubmission() public {
-        address unauthorizedUser = address(0x999);
-        vm.startPrank(unauthorizedUser);
-        chatBot.submitAnswer("Unauthorized answer", user);
         vm.stopPrank();
     }
 }

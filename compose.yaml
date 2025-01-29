@@ -5,5 +5,8 @@ services:
       - "11434:11434"
     volumes:
       - /storage/ollama:/root/.ollama
-      - ./docker/entrypoint.sh:/entrypoint.sh
-    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]
+        #      - ./docker/entrypoint.sh:/entrypoint.sh
+        #    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]
+    entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
+      #  oracle:
+

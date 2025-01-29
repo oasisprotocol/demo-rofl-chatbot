@@ -2,17 +2,18 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Counter} from "../src/Counter.sol";
+import {ChatBot} from "../src/ChatBot.sol";
 
-contract CounterScript is Script {
-    Counter public counter;
+contract ChatBotScript is Script {
+    ChatBot public chatBot;
 
     function setUp() public {}
 
     function run() public {
         vm.startBroadcast();
 
-        counter = new Counter();
+        // TODO
+        chatBot = new ChatBot("example.com", hex"000000000000000000000000000000000000000000", address(0));
 
         vm.stopBroadcast();
     }
