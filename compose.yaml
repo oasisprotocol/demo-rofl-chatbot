@@ -1,0 +1,9 @@
+services:
+  ollama:
+    image: "ollama/ollama"
+    ports:
+      - "11434:11434"
+    volumes:
+      - /storage/ollama:/root/.ollama
+      - ./docker/entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]
