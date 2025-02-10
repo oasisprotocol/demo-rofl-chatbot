@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from src.ChatBotOracle import ChatBotOracle
-from src.utils import fetch_oracle_key
+from src.RoflUtility import RoflUtility
 import argparse
 
 def main():
@@ -27,14 +27,14 @@ def main():
 
     parser.add_argument(
         "--kms",
-        help="ROFL Key Management Service URL",
-        default="http://localhost/rofl/v1/keys/generate",
+        help="ROFL's appd service URL",
+        default="http+unix:/run/rofl-appd.sock",
     )
 
     parser.add_argument(
         "--key-id",
         help="Key ID for looking it up on the KMS",
-        default="chatbot",
+        default="chatbot-oracle",
     )
 
     parser.add_argument(
@@ -45,11 +45,13 @@ def main():
 
     arguments = parser.parse_args()
 
+    rofl_utility = RoflUtility(arguments.kms)
+
     secret = arguments.secret
     if secret == None:
-        secret = fetch_oracle_key(arguments.key_id, arguments.kms)
+        secret = rofl_utility.fetch_key(arguments.key_id)
 
-    chatBotOracle = ChatBotOracle(arguments.contract_address, arguments.network, secret)
+    chatBotOracle = ChatBotOracle(arguments.contract_address, arguments.network, rofl_utility, secret)
     chatBotOracle.run()
 
 if __name__ == '__main__':

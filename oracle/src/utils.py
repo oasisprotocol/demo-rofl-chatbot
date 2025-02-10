@@ -5,8 +5,6 @@ from eth_account import Account
 from sapphirepy import sapphire
 import json
 from pathlib import Path
-import requests
-
 
 def setup_web3_middleware(network: str, PRIVATE_KEY: str) -> Web3:
     if not all([PRIVATE_KEY, ]):
@@ -39,11 +37,3 @@ def get_contract(contract_name: str):
     return abi, bytecode
 
 
-def fetch_oracle_key(id: str, url: str) -> str:
-    payload = {
-        "key_id": id,
-        "kind": "secp256k1"
-    }
-    response = requests.post(url, json=payload)
-    response.raise_for_status()
-    return response.json()["key"]

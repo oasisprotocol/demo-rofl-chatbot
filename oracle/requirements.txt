@@ -3,3 +3,4 @@ py-solc-x
 pytest
 oasis-sapphire-py
 ollama
+requests-unixsocket

@@ -4,16 +4,20 @@ import requests
 from ollama import Client, ChatResponse
 
 from .ContractUtility import ContractUtility
+from .RoflUtility import RoflUtility
 from .utils import get_contract
+
 
 class ChatBotOracle:
     def __init__(self,
                  contract_address: str,
                  network_name: str,
+                 rofl_utility: RoflUtility,
                  secret: str):
         contract_utility = ContractUtility(network_name, secret)
         abi, bytecode = get_contract('ChatBot')
 
+        self.rofl_utility = rofl_utility
         self.contract = contract_utility.w3.eth.contract(address=contract_address, abi=abi)
         self.w3 = contract_utility.w3
 
@@ -21,7 +25,8 @@ class ChatBotOracle:
         contract_addr = self.contract.functions.oracle().call()
         if  contract_addr != self.w3.eth.default_account:
             print(f"Contract oracle {contract_addr} does not match our address {self.w3.eth.default_account}, updating...",)
-            tx_hash = self.contract.functions.setOracle(self.w3.eth.default_account).transact({'gasPrice': self.w3.eth.gas_price})
+            tx_params = self.contract.functions.setOracle(self.w3.eth.default_account).build_transaction({'gasPrice': self.w3.eth.gas_price})
+            tx_hash = self.rofl_utility.submit_tx(tx_params)
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             print(f"Updated. Transaction hash: {tx_receipt.transactionHash.hex()}")
         else:
