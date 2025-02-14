@@ -107,7 +107,7 @@ export const HomePage: FC = () => {
             <div className={classes.activeMessageText}>
               <h3>Conversation history</h3>
             </div>
-            {message?.prompts.map((object, i) => <div>{object}<div style={{marginLeft: 50 + 'px'}}>{i<message?.answers.length ? message?.answers[i]: ''}</div></div>)}
+            {message?.prompts.map((object, i) => <div>{object}<div style={{marginLeft: 50 + 'px'}}>{(i<message?.answers.length && message?.answers[i].promptId == i) ? message?.answers[i].answer: ''}</div></div>)}
             {isSapphire && !message && (
             <RevealInput
               disabled

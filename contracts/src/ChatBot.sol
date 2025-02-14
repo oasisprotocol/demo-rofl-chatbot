@@ -4,9 +4,14 @@ pragma solidity ^0.8.0;
 import {Subcall} from "@oasisprotocol/sapphire-contracts/contracts/Subcall.sol";
 import {SiweAuth} from "@oasisprotocol/sapphire-contracts/contracts/auth/SiweAuth.sol";
 
+struct Answer {
+    uint256 promptId;
+    string answer;
+}
+
 contract ChatBot is SiweAuth {
     mapping(address => string[]) private _prompts;
-    mapping(address => string[]) private _answers;
+    mapping(address => Answer[]) private _answers;
 
     address public oracle;    // Oracle address running inside TEE.
     bytes21 public roflAppID; // Allowed app ID within TEE for managing allowed oracle address.
@@ -14,6 +19,8 @@ contract ChatBot is SiweAuth {
     event PromptSubmitted(address indexed sender);
     event AnswerSubmitted(address indexed sender);
 
+    error InvalidPromptId();
+    error PromptAlreadyAnswered();
     error UnauthorizedUserOrOracle();
     error UnauthorizedOracle();
 
@@ -93,7 +100,7 @@ contract ChatBot is SiweAuth {
     function getAnswers(bytes memory authToken, address addr)
         external view
         onlyUserOrOracle(authToken, addr)
-        returns (string[] memory)
+        returns (Answer[] memory)
     {
         return _answers[addr];
     }
@@ -107,8 +114,17 @@ contract ChatBot is SiweAuth {
 
     // Submits the answer to the prompt for a given user address.
     // Called by the oracle within TEE.
-    function submitAnswer(string memory answer, address addr) external onlyOracle() {
-        _answers[addr].push(answer);
+    function submitAnswer(string memory answer, uint256 promptId, address addr) external onlyOracle() {
+        if (promptId >= _prompts[addr].length) {
+            revert InvalidPromptId();
+        }
+        if (_answers[addr].length > 0 && _answers[addr][_answers[addr].length - 1].promptId >= promptId) {
+            revert PromptAlreadyAnswered();
+        }
+        _answers[addr].push(Answer({
+            promptId: promptId,
+            answer: answer
+        }));
         emit AnswerSubmitted(addr);
     }
 }
