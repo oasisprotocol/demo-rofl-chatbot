@@ -38,12 +38,17 @@ class ChatBotOracle:
                 submitter = log.args.sender
                 print(f"New prompt submitted by {submitter}")
                 prompts = self.retrieve_prompts(submitter)
-                print(f"Got prompts from {submitter}, asking chat bot")
+                print(f"Got prompts from {submitter}")
+                answers = self.retrieve_answers(submitter)
+                print(f"Got answers from {submitter}")
+                if len(answers)>0 and answers[-1].promptId == len(prompts)-1:
+                    print(f"Last prompt already answered, skipping")
+                    break
+                print(f"Asking chat bot")
                 answer = self.ask_chat_bot(prompts)
                 print(f"Storing chat bot answer for {submitter}")
                 self.submit_answer(answer, submitter)
             await asyncio.sleep(poll_interval)
-
 
     def run(self) -> None:
         self.set_oracle_address()
@@ -63,6 +68,15 @@ class ChatBotOracle:
             return prompts
         except Exception as e:
             print(f"Error retrieving prompts: {e}")
+            return []
+
+    def retrieve_answers(self,
+                         address: str) -> list[str]:
+        try:
+            answers = self.contract.functions.getAnswers(b'', address).call()
+            return answers
+        except Exception as e:
+            print(f"Error retrieving answers: {e}")
             return []
 
 
