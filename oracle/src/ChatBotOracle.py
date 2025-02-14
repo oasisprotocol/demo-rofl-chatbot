@@ -5,7 +5,6 @@ from ollama import Client, ChatResponse
 
 from .ContractUtility import ContractUtility
 from .RoflUtility import RoflUtility
-from .utils import get_contract
 
 
 class ChatBotOracle:
@@ -15,7 +14,7 @@ class ChatBotOracle:
                  rofl_utility: RoflUtility,
                  secret: str):
         contract_utility = ContractUtility(network_name, secret)
-        abi, bytecode = get_contract('ChatBot')
+        abi, bytecode = ContractUtility.get_contract('ChatBot')
 
         self.rofl_utility = rofl_utility
         self.contract = contract_utility.w3.eth.contract(address=contract_address, abi=abi)

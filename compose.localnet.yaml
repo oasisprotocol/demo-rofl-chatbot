@@ -8,4 +8,5 @@ services:
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
   oracle:
     build: oracle
+    entrypoint: ["python", "main.py", "--secret", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", "${CONTRACT_ADDRESS}"]
 

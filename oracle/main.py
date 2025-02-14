@@ -27,13 +27,13 @@ def main():
 
     parser.add_argument(
         "--kms",
-        help="ROFL's appd service URL",
-        default="http+unix:/run/rofl-appd.sock",
+        help="Override ROFL's appd service URL",
+        default="",
     )
 
     parser.add_argument(
         "--key-id",
-        help="Key ID for looking it up on the KMS",
+        help="Override the oracle's secret key ID on KMS",
         default="chatbot-oracle",
     )
 
