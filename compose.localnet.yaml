@@ -6,7 +6,33 @@ services:
     volumes:
       - /storage/ollama:/root/.ollama
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
-  oracle:
-    build: oracle
-    entrypoint: ["python", "main.py", "--secret", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", "${CONTRACT_ADDRESS}"]
 
+  "sapphire-localnet":
+    image: "ghcr.io/oasisprotocol/sapphire-localnet"
+    ports:
+      - "8544-8548:8544-8548"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/CONTAINER_READY"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+
+  forge:
+    image: "ghcr.io/foundry-rs/foundry:latest"
+    volumes:
+      - ./contracts:/contracts
+    command: "cd contrats && forge create --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://sapphire-localnet:8545 --broadcast ChatBot --constructor-args localhost 00d795c033fb4b94873d81b6327f5371768ffc6fcf 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    depends_on:
+      "sapphire-localnet":
+        condition: service_healthy
+
+  oracle:
+    environment:
+      CONTRACT_ADDRESS: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+    build: .
+      #    entrypoint: ["python", "main.py", "--secret", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", "${CONTRACT_ADDRESS}"]
+    entrypoint: ["/usr/bin/bash", "-c", "python main.py --network http://sapphire-localnet:8545 --secret 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 0x5FbDB2315678afecb367f032d93F642f64180aa3"]
+    restart: on-failure
+    depends_on:
+      forge:
+        condition: service_completed_successfully

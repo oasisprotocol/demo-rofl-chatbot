@@ -7,5 +7,7 @@ services:
       - /storage/ollama:/root/.ollama
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
   oracle:
-    build: oracle
+    environment:
+      CONTRACT_ADDRESS: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+    build: .
 

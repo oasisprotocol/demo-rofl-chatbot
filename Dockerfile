@@ -1,7 +1,8 @@
 FROM python:alpine3.17
-ENV CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+#ENV CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3 # Must be defined in compose.yaml
 WORKDIR /oracle
-COPY . /oracle
+COPY /oracle /oracle
+COPY /contracts /contracts
 RUN apk update && apk add python3-dev gcc libc-dev
 RUN pip install -r requirements.txt
 ENTRYPOINT ["python", "main.py", "${CONTRACT_ADDRESS}"]
