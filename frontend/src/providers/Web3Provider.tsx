@@ -13,7 +13,7 @@ import {
 import { SiweMessage } from 'siwe'
 import { wrapEthersSigner, NETWORKS } from '@oasisprotocol/sapphire-ethers-v6'
 import * as ChatBotAbi from '../../../contracts/out/ChatBot.sol/ChatBot.json'
-import {PromptsAnswers} from "../types";
+import {Answer, PromptsAnswers} from "../types";
 
 const { VITE_MESSAGE_BOX_ADDR } = import.meta.env
 
@@ -272,9 +272,19 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     const chatBot = await getChatBot()
     const authInfo = await _getAuthInfo(chatBot)
     const [prompts, answersRaw] = await Promise.all([chatBot.getPrompts(authInfo, state.account), chatBot.getAnswers(authInfo, state.account)])
-    let answers: string[] = []
-    for (let i=0; i<answersRaw.length; i++) { // trim off <think>...</think>
-      answers.push(answersRaw[i].substring(answersRaw[i].indexOf("</think>") + 8))
+    let answers: Answer[] = []
+
+    // Align prompts with (potentially empty) answers.
+    for (let i=0, j=0; i<prompts.length; i++) {
+      let answer = ''
+      if (j<answersRaw.length && answersRaw[j].promptId==i) {
+        answer = answersRaw[j].answer.substring(answersRaw[j].answer.indexOf("</think>") + 8) // trim off <think>...</think>,
+        j++
+      }
+      answers.push({
+        answer,
+        promptId: i
+      });
     }
     return { prompts, answers, htmlContent: '' }
   }
