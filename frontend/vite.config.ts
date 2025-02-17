@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), svgr()],
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
-    BUILD_COMMIT: JSON.stringify(execSync('git rev-parse HEAD').toString()),
+    BUILD_COMMIT: JSON.stringify(execSync('git rev-parse HEAD || echo ""').toString()),
     BUILD_DATETIME: JSON.stringify(new Date().getTime()),
   },
 })
