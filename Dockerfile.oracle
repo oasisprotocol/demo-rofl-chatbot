@@ -4,5 +4,5 @@ WORKDIR /oracle
 COPY ./oracle /oracle
 COPY ./contracts /contracts
 RUN apk update && apk add python3-dev gcc libc-dev
-RUN pip install -r requirements.txt
+RUN python -m venv my_env && source my_env/bin/activate && pip install -r requirements.txt
 ENTRYPOINT ["python", "main.py", "${CONTRACT_ADDRESS}"]

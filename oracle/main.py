@@ -26,6 +26,12 @@ def main():
     )
 
     parser.add_argument(
+        "--ollama-address",
+        help="Host running the ollama service",
+        default="http://localhost:11434",
+    )
+
+    parser.add_argument(
         "--kms",
         help="Override ROFL's appd service URL",
         default="",
@@ -51,7 +57,7 @@ def main():
     if secret == None:
         secret = rofl_utility.fetch_key(arguments.key_id)
 
-    chatBotOracle = ChatBotOracle(arguments.contract_address, arguments.network, rofl_utility, secret)
+    chatBotOracle = ChatBotOracle(arguments.contract_address, arguments.network, arguments.ollama_address, rofl_utility, secret)
     chatBotOracle.run()
 
 if __name__ == '__main__':

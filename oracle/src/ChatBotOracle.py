@@ -11,12 +11,14 @@ class ChatBotOracle:
     def __init__(self,
                  contract_address: str,
                  network_name: str,
+                 ollama_address: str,
                  rofl_utility: RoflUtility,
                  secret: str):
         contract_utility = ContractUtility(network_name, secret)
         abi, bytecode = ContractUtility.get_contract('ChatBot')
 
         self.rofl_utility = rofl_utility
+        self.ollama_address = ollama_address
         self.contract = contract_utility.w3.eth.contract(address=contract_address, abi=abi)
         self.w3 = contract_utility.w3
 
@@ -92,7 +94,7 @@ class ChatBotOracle:
                     'content': prompt
                 })
             client = Client(
-                host='http://localhost:11434',
+                host=self.ollama_address,
             )
             response: ChatResponse = client.chat(model='deepseek-r1:1.5b', messages=messages)
             return response['message']['content']
