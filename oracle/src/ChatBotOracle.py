@@ -38,16 +38,19 @@ class ChatBotOracle:
                 submitter = log.args.sender
                 print(f"New prompt submitted by {submitter}")
                 prompts = self.retrieve_prompts(submitter)
+                print(f"debug prompts: {prompts}")
                 print(f"Got prompts from {submitter}")
                 answers = self.retrieve_answers(submitter)
                 print(f"Got answers from {submitter}")
-                if len(answers)>0 and answers[-1].promptId == len(prompts)-1:
+                print(f"debug existing answers: {answers}")
+                if len(answers)>0 and answers[-1][0] == len(prompts)-1: # check promptId
                     print(f"Last prompt already answered, skipping")
                     break
                 print(f"Asking chat bot")
                 answer = self.ask_chat_bot(prompts)
+                print(f"debug new answer: {answer}")
                 print(f"Storing chat bot answer for {submitter}")
-                self.submit_answer(answer, submitter)
+                self.submit_answer(answer, len(prompts)-1, submitter)
             await asyncio.sleep(poll_interval)
 
     def run(self) -> None:
@@ -71,7 +74,7 @@ class ChatBotOracle:
             return []
 
     def retrieve_answers(self,
-                         address: str) -> list[str]:
+                         address: str) -> list[(int, str)]:
         try:
             answers = self.contract.functions.getAnswers(b'', address).call()
             return answers
@@ -97,8 +100,8 @@ class ChatBotOracle:
             print(f"Error calling Ollama API: {e}")
             return "Error generating response"
 
-    def submit_answer(self, answer: str, address: str):
+    def submit_answer(self, answer: str, prompt_id: int, address: str):
         # Set a message
-        tx_hash = self.contract.functions.submitAnswer(answer, address).transact({'gasPrice': self.w3.eth.gas_price, 'gas': max(3000000, 1500*len(answer))})
+        tx_hash = self.contract.functions.submitAnswer(answer, prompt_id, address).transact({'gasPrice': self.w3.eth.gas_price, 'gas': max(3000000, 1500*len(answer))})
         tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
         print(f"Submitted answer. Transaction hash: {tx_receipt.transactionHash.hex()}")
