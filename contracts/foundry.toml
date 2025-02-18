@@ -1,9 +1,6 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["lib", "dependencies"]
-
-[dependencies]
-"@openzeppelin-contracts" = "5.0.2"
+libs = ["lib"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
