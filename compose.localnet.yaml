@@ -9,6 +9,7 @@ services:
 
   "sapphire-localnet":
     image: "ghcr.io/oasisprotocol/sapphire-localnet"
+    platform: "linux/x86_64"
     ports:
       - "8544-8548:8544-8548"
     healthcheck:
