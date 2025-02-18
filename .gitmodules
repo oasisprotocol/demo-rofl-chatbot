@@ -5,3 +5,6 @@
 	path = contracts/lib/sapphire-paratime
 	url = https://github.com/oasisprotocol/sapphire-paratime
 	tag = contracts/v0.2.12
+[submodule "contracts/lib/openzeppelin-contracts"]
+	path = contracts/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts

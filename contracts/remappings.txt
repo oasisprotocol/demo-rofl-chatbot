@@ -1,1 +1,2 @@
 @oasisprotocol/sapphire-contracts/=lib/sapphire-paratime/contracts/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
