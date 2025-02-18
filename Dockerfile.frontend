@@ -1,14 +1,12 @@
+FROM ghcr.io/foundry-rs/foundry:latest AS contracts-build
+COPY ./contracts /contracts
+RUN cd /contracts && forge build
+
 FROM node:21-alpine3.19
-
 WORKDIR /frontend
-
 COPY ./frontend/yarn.lock ./frontend/package.json /frontend
-COPY ./contracts ./frontend/package.json /contracts
-
+COPY --from=contracts-build /contracts /contracts
 RUN yarn install
-
 COPY ./frontend /frontend
-
 EXPOSE 5173
-
 CMD ["yarn", "dev", "--host", "0.0.0.0"]
