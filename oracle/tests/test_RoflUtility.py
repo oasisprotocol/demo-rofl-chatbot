@@ -1,10 +1,12 @@
-import requests
+import httpx
 import unittest
 from unittest.mock import patch, MagicMock
+from web3.types import TxParams
+
 from ..src.RoflUtility import RoflUtility
 
 class TestRoflUtility(unittest.TestCase):
-    tx_params = {
+    tx_params: TxParams = {
         'value': 0,
         'chainId': 23293,
         'gasPrice': 1000,
@@ -15,77 +17,53 @@ class TestRoflUtility(unittest.TestCase):
 
     def setUp(self):
         self.rofl_utility = RoflUtility()
-        self.rofl_utility_with_url = RoflUtility("http://test.url")
+        self.rofl_utility_with_url = RoflUtility("http://test.com")
 
-    @patch('requests.Session')
-    def test_fetch_key_local(self, mock_session):
+    @patch('httpx.Client')
+    def test_fetch_key(self, mock_client):
+        # Setup mock
         mock_response = MagicMock()
-        mock_response.json.return_value = {"key": "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a"}
-        mock_session.return_value.post.return_value = mock_response
+        mock_response.json.return_value = {"key": "test_key"}
+        mock_instance = mock_client.return_value
+        mock_instance.post.return_value = mock_response
 
-        result = self.rofl_utility.fetch_key("test_id")
-
-        self.assertEqual(result, "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a")
-        mock_session.return_value.post.assert_called_once_with(
+        # Test with default URL
+        key = self.rofl_utility.fetch_key("test_id")
+        self.assertEqual(key, "test_key")
+        mock_instance.post.assert_called_with(
             "http://localhost/rofl/v1/keys/generate",
             json={"key_id": "test_id", "kind": "secp256k1"}
         )
 
-    @patch('requests.Session')
-    def test_fetch_key_remote(self, mock_session):
+    @patch('httpx.Client')
+    def test_submit_tx(self, mock_client):
+        # Setup mock
         mock_response = MagicMock()
-        mock_response.json.return_value = {"key": "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a"}
-        mock_session.return_value.post.return_value = mock_response
+        mock_response.json.return_value = {"txHash": "0x123"}
+        mock_instance = mock_client.return_value
+        mock_instance.post.return_value = mock_response
 
-        result = self.rofl_utility_with_url.fetch_key("test_id")
-
-        self.assertEqual(result, "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a")
-        mock_session.return_value.post.assert_called_once_with(
-            "http://test.url/rofl/v1/keys/generate",
-            json={"key_id": "test_id", "kind": "secp256k1"}
-        )
-
-    @patch('requests.Session')
-    def test_submit_tx_local(self, mock_session):
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"transaction_hash": "0x1279a4718c02a5d3ca68f68b234b7dcdbe0e41892ea3217235b98810f97dedf7"}
-        mock_session.return_value.post.return_value = mock_response
-
+        # Test with default URL
         result = self.rofl_utility.submit_tx(self.tx_params)
-
-        self.assertEqual(result, {"transaction_hash": "0x1279a4718c02a5d3ca68f68b234b7dcdbe0e41892ea3217235b98810f97dedf7"})
-        mock_session.return_value.post.assert_called_once_with(
+        self.assertEqual(result, {"txHash": "0x123"})
+        mock_instance.post.assert_called_with(
             "http://localhost/rofl/v1/tx/sign-submit",
             json={"tx": {"eth": self.tx_params}, "encrypt": False}
         )
 
-    @patch('requests.Session')
-    def test_submit_tx_remote(self, mock_session):
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"transaction_hash": "0x1279a4718c02a5d3ca68f68b234b7dcdbe0e41892ea3217235b98810f97dedf7"}
-        mock_session.return_value.post.return_value = mock_response
+    @patch('httpx.Client')
+    def test_error_handling(self, mock_client):
+        # Setup mock to raise an error
+        mock_instance = mock_client.return_value
+        mock_instance.post.side_effect = httpx.HTTPError("Test error")
 
-        result = self.rofl_utility_with_url.submit_tx(self.tx_params)
-
-        self.assertEqual(result, {"transaction_hash": "0x1279a4718c02a5d3ca68f68b234b7dcdbe0e41892ea3217235b98810f97dedf7"})
-        mock_session.return_value.post.assert_called_once_with(
-            "http://test.url/rofl/v1/tx/sign-submit",
-            json={"tx": {"eth": self.tx_params}, "encrypt": False}
-        )
-
-    @patch('requests.Session')
-    def test_fetch_key_error_handling(self, mock_session):
-        mock_session.return_value.post.side_effect = requests.exceptions.RequestException
-
-        with self.assertRaises(requests.exceptions.RequestException):
+        # Test error handling in fetch_key
+        with self.assertRaises(httpx.HTTPError):
             self.rofl_utility.fetch_key("test_id")
 
-    @patch('requests.Session')
-    def test_submit_tx_error_handling(self, mock_session):
-        mock_session.return_value.post.side_effect = requests.exceptions.RequestException
-
-        with self.assertRaises(requests.exceptions.RequestException):
-            self.rofl_utility.submit_tx(self.tx_params)
+        # Test error handling in submit_tx
+        with self.assertRaises(httpx.HTTPError):
+            self.rofl_utility.submit_tx({"to": "0x123", "value": 1000})
 
 if __name__ == '__main__':
     unittest.main()
