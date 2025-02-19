@@ -1,48 +1,45 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, KeyboardEventHandler, useEffect, useState, Fragment } from 'react'
 import { Card } from '../../components/Card'
-import { Input } from '../../components/Input'
 import { Button } from '../../components/Button'
 import classes from './index.module.css'
 import { useWeb3 } from '../../hooks/useWeb3'
-import { RevealInput } from '../../components/Input/RevealInput'
 import { PromptsAnswers } from '../../types'
 import { StringUtils } from '../../utils/string.utils'
+import { DeleteIcon } from '../../components/icons/DeleteIcon'
+import { SendIcon } from '../../components/icons/SendIcon'
+import { RevealContent } from '../../components/RevealContent'
+import { ScrollToBottom } from '../../components/ScrollToBottom'
+import { LoadingIcon } from '../../components/icons/LoadingIcon'
 
 export const HomePage: FC = () => {
   const {
-    state: { isConnected, isSapphire, isInteractingWithChain, isWaitingChatBot, account },
+    state: { isConnected, isSapphire, isInteractingWithChain, isWaitingChatBot },
     getPromptsAnswers: web3GetPromptsAnswers,
     ask: web3Ask,
     clear: web3Clear,
   } = useWeb3()
-  const [message, setMessage] = useState<PromptsAnswers | null>(null)
-  const [messageValue, setMessageValue] = useState<string>('')
-  const [messageRevealLabel, setMessageRevealLabel] = useState<string>()
-  const [messageError, setMessageError] = useState<string | null>(null)
-  const [messageValueError, setMessageValueError] = useState<string>()
+  const [conversation, setConversation] = useState<PromptsAnswers | null>(null)
+  const [conversationRevealLabel, setConversationRevealLabel] = useState<string>()
+  const [conversationError, setConversationError] = useState<string | null>(null)
+  const [promptValue, setPromptValue] = useState<string>('')
+  const [promptValueError, setPromptValueError] = useState<string>()
   const [hasBeenRevealedBefore, setHasBeenRevealedBefore] = useState(false)
+  const [tempPrompt, setTempPrompt] = useState<string | null>(null)
 
-  const fetchMessage = async () => {
-    setMessageError(null)
-    setMessageRevealLabel('Please sign message and wait...')
+  const fetchConversation = async () => {
+    setConversationError(null)
+    setConversationRevealLabel('Please sign message and wait...')
 
     try {
-      let promptsAnswers = await web3GetPromptsAnswers()
-      promptsAnswers.htmlContent = '';
-      for (let i=0; i<promptsAnswers.prompts.length; i++) {
-        promptsAnswers.htmlContent += promptsAnswers.prompts[i]+"<br/>"
-        if (i<promptsAnswers.answers.length) {
-          promptsAnswers.htmlContent += promptsAnswers.answers[i] + "<br/>"
-        }
-      }
-      setMessage(promptsAnswers)
-      setMessageRevealLabel(undefined)
+      const promptsAnswers = await web3GetPromptsAnswers()
+      setConversation(promptsAnswers)
+      setConversationRevealLabel(undefined)
       setHasBeenRevealedBefore(true)
 
       return Promise.resolve()
     } catch (ex) {
-      setMessageError((ex as Error).message)
-      setMessageRevealLabel('Something went wrong! Please try again...')
+      setConversationError((ex as Error).message)
+      setConversationRevealLabel('Something went wrong! Please try again...')
 
       throw ex
     }
@@ -54,7 +51,7 @@ export const HomePage: FC = () => {
     }
 
     if (!isSapphire) {
-      fetchMessage()
+      fetchConversation()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSapphire])
@@ -63,56 +60,74 @@ export const HomePage: FC = () => {
     if (!isSapphire) {
       return Promise.resolve(void 0)
     }
-    return fetchMessage()
+    return fetchConversation()
   }
 
   const handleAsk = async () => {
-    setMessageValueError(undefined)
+    setPromptValueError(undefined)
 
-    if (!messageValue) {
-      setMessageValueError('Message is required!')
+    if (!promptValue) {
+      setPromptValueError('Prompt is required!')
 
       return
     }
 
     try {
-      await web3Ask(messageValue)
-      setMessageValue('')
+      await web3Ask(promptValue, () => {
+        setTempPrompt(promptValue)
+        setPromptValue('')
+      })
+      setTempPrompt(null)
+      setPromptValue('')
 
       if (!hasBeenRevealedBefore) {
-        setMessage(null)
-        setMessageRevealLabel('Tap to reveal')
+        setConversation(null)
+        setConversationRevealLabel('Conversation history is inaccessible, sign a message to reveal it...')
       } else {
-        fetchMessage()
+        fetchConversation()
       }
     } catch (ex) {
-      setMessageValueError((ex as Error).message)
+      setPromptValue(promptValue)
+      setPromptValueError((ex as Error).message)
+    }
+  }
+
+  const handleTextareaKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = e => {
+    const { shiftKey, key } = e
+
+    if (key === 'Enter' && !shiftKey) {
+      handleAsk()
     }
   }
 
   const handleClear = async () => {
     try {
       await web3Clear()
-      setMessage(null)
+      fetchConversation()
     } catch (ex) {
-      setMessageValueError((ex as Error).message)
+      setPromptValueError((ex as Error).message)
     }
+  }
+
+  const mapPrompts = (prompt: string, i: number) => {
+    return (
+      <Fragment key={i}>
+        <p className={StringUtils.clsx(classes.bubble, classes.me)}>{prompt}</p>
+        {i < (conversation?.answers?.length ?? 0) && (
+          <p className={classes.bubble}>{conversation?.answers[i].answer}</p>
+        )}
+      </Fragment>
+    )
   }
 
   return (
     <div className={classes.homePage}>
       <Card header={<h2>C10l ChatBot 🤖</h2>}>
         {isConnected && (
-          <>
-            <div className={classes.activeMessageText}>
-              <h3>Conversation history</h3>
-            </div>
-            {message?.prompts.map((object, i) => <div>{object}<div style={{marginLeft: 50 + 'px'}}>{(i<message?.answers.length) ? message?.answers[i].answer: ''}</div></div>)}
-            {isSapphire && !message && (
-            <RevealInput
-              disabled
-              reveal={false}
-              revealLabel={!!isSapphire && !!message ? undefined : messageRevealLabel}
+          <div className={classes.cardContent}>
+            <RevealContent
+              className={classes.revealConversation}
+              revealLabel={!!isSapphire && !!conversation ? undefined : conversationRevealLabel}
               onRevealChange={() => {
                 if (!isInteractingWithChain) {
                   return handleRevealChanged()
@@ -120,27 +135,54 @@ export const HomePage: FC = () => {
 
                 return Promise.reject()
               }}
-            />
-            )}
-            {messageError && <p className="error">{StringUtils.truncate(messageError)}</p>}
-            <div className={classes.setMessageText}>
-              <h3>Ask me anything</h3>
+            >
+              <div className={classes.conversation}>
+                {!conversation?.prompts.length && !tempPrompt && (
+                  <p className={StringUtils.clsx(classes.bubble, classes.alert)}>
+                    No conversation history available
+                  </p>
+                )}
+                {!!conversation?.prompts.length && conversation?.prompts.map(mapPrompts)}
+                {tempPrompt && <p className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</p>}
+                {isWaitingChatBot && (
+                  <p className={StringUtils.clsx(classes.bubble, classes.loading)}>
+                    <LoadingIcon />
+                  </p>
+                )}
+                <ScrollToBottom />
+              </div>
+            </RevealContent>
+
+            <div className={classes.cardContentInput}>
+              <textarea
+                placeholder="Ask your question here..."
+                className={classes.textareaInput}
+                value={promptValue}
+                onChange={({ target: { value } }) => setPromptValue(value)}
+                onKeyDown={handleTextareaKeyDown}
+                disabled={isInteractingWithChain}
+              />
+              <div className={classes.promptActions}>
+                <Button
+                  size="small"
+                  disabled={isInteractingWithChain || isWaitingChatBot}
+                  onClick={handleAsk}
+                >
+                  <SendIcon />
+                </Button>
+                <Button
+                  size="small"
+                  color="danger"
+                  disabled={isInteractingWithChain || isWaitingChatBot}
+                  onClick={handleClear}
+                >
+                  <DeleteIcon />
+                </Button>
+              </div>
             </div>
-            <Input
-              value={messageValue}
-              onChange={setMessageValue}
-              error={messageValueError}
-              disabled={isInteractingWithChain}
-            />
-            <div className={classes.setMessageActions}>
-              <Button disabled={isInteractingWithChain || isWaitingChatBot} onClick={handleAsk}>
-                {isInteractingWithChain ? 'Submitting...' : isWaitingChatBot ? 'Waiting for answer' : 'Ask'}
-              </Button>
-              <Button disabled={isInteractingWithChain || isWaitingChatBot} onClick={handleClear}>
-                Clear
-              </Button>
-            </div>
-          </>
+            {promptValueError && <p className="error">{StringUtils.truncate(promptValueError)}</p>}
+            {conversationError && <p className="error">{StringUtils.truncate(conversationError)}</p>}
+          </div>
         )}
         {!isConnected && (
           <>

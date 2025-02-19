@@ -5,16 +5,92 @@
   text-align: center;
 }
 
-.activeMessageText {
-  margin-bottom: 1rem;
-}
-
-.setMessageText {
-  margin: 2rem 0 1rem;
-}
-
-.setMessageActions {
+.promptActions {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  padding-top: 1rem;
+  gap: 0.25rem;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  svg {
+    fill: var(--white);
+  }
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1rem;
+}
+
+.revealConversation {
+  display: flex;
+  flex: 1 1 450px;
+  width: 100%;
+}
+
+.conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 450px;
+  overflow-y: auto;
+  width: 100%;
+  text-align: center;
+}
+
+.bubble {
+  display: inline-block;
+  padding: 0.5rem;
+  border-radius: 4px;
+  max-width: 75%;
+  text-align: left;
+
+  &.me {
+    background-color: var(--brand-blue);
+    color: var(--white);
+    border: 2px var(--brand-blue) solid;
+    margin-left: auto;
+  }
+
+  &.alert {
+    background-color: var(--gray);
+    color: var(--white);
+    border: 2px var(--gray) solid;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  &.loading {
+    display: flex;
+    justify-content: center;
+    width: 50px;
+  }
+
+  &:not(.me)&:not(.alert) {
+    background-color: var(--gray-light);
+    color: var(--brand-extra-dark-75);
+    border: 2px var(--gray-light) solid;
+    margin-right: auto;
+  }
+}
+
+.cardContentInput {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.textareaInput {
+  width: 100%;
+  resize: none;
 }

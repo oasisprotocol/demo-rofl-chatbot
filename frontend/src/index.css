@@ -116,3 +116,15 @@ h3 {
   line-height: 25.2px;
   color: var(--brand-extra-dark);
 }
+
+textarea {
+  padding: 0.5rem;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  border-radius: 4px;
+  outline: 2px solid transparent;
+  appearance: none;
+  border: 2px solid var(--brand-blue);
+  color: var(--brand-extra-dark);
+}

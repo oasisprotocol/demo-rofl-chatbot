@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import { BrowserProvider, JsonRpcProvider, TransactionResponse } from 'ethers'
-import {PromptsAnswers} from '../types'
+import { PromptsAnswers } from '../types'
 
 export interface Web3ProviderState {
   isConnected: boolean
@@ -29,7 +29,7 @@ export interface Web3ProviderContext {
   getGasPrice: () => Promise<bigint>
   isProviderAvailable: () => Promise<boolean>
   getPromptsAnswers: () => Promise<PromptsAnswers>
-  ask: (prompt: string) => Promise<void>
+  ask: (prompt: string, txSubmittedCb: () => void) => Promise<void>
   clear: () => Promise<void>
 }
 
