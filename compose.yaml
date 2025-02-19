@@ -8,10 +8,8 @@ services:
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
 
   oracle:
+    image: "ghcr.io/matevz/demo-rofl-chatbot:latest"
     environment:
-      CONTRACT_ADDRESS: 0x5FbDB2315678afecb367f032d93F642f64180aa3
-      SECRET_KEY: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-    build:
-      dockerfile: Dockerfile.oracle
-    entrypoint: /bin/sh -c 'python main.py --network https://testnet.sapphire.oasis.io --ollama-address http://ollama:11434 --secret $${SECRET_KEY} $${CONTRACT_ADDRESS}'
+      CONTRACT_ADDRESS: 0xD20Bea4e8CA596891ed2c97fdEca86aF7821aCC1
+    entrypoint: /bin/sh -c 'python main.py --network https://testnet.sapphire.oasis.io --ollama-address http://ollama:11434 $${CONTRACT_ADDRESS}'
     restart: on-failure

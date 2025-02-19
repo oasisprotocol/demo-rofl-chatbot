@@ -13,14 +13,17 @@ artifacts:
   kernel: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.3.3/stage1.bin#539f25c66a27b2ca3c6b4d3333b88c64e531fcc96776c37a12c9ce06dd7fbac9
   stage2: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.3.3/stage2-podman.tar.bz2#827531546f3db6b0945ece7ddab4e10d648eaa3ba1c146b7889d7cb9cbf0b507
   container:
-    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.3.4/rofl-containers#d6a055b2e88e1f321e3ab1f73046444e24df9d8925d13cc6b8230de9a81e5c41
+    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.4.1/rofl-containers#bdd2735af9ff10c9b1c1e8db535f4751739bd3707600c57b81e80195e6207673
     compose: compose.yaml
 deployments:
   default:
-    app_id: rofl1qrl2fdn7pqxqs63v5cjyvtg88kvpckjkvvu8vx2p
-    network: localnet
+    app_id: rofl1qrtetspnld9efpeasxmryl6nw9mgllr0euls3dwn
+    network: testnet
     paratime: sapphire
-    admin: test:dave
+    admin: dave
+    trust_root:
+      height: 25327057
+      hash: 40c0672323c8e314090e95800a597a5d587e41a9b149cc5d7b0aeb8f8794b9f7
     policy:
       quotes:
         pcs:
@@ -28,26 +31,8 @@ deployments:
           min_tcb_evaluation_data_number: 17
           tdx: {}
       enclaves:
-        - OHJwJuFGEPspBhHUy0+Uv25OxvpZVaZwmNuFsVpWsu4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - 8GtWDOaxWbbFHHa0RuHPL+CzcIo8pM5xmaLv7zydlg8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-      endorsements:
-        - any: {}
-      fees: endorsing_node
-      max_expiration: 3
-  testnet:
-    network: testnet
-    paratime: sapphire
-    admin: test
-    trust_root:
-      height: 25014260
-      hash: 3d4f39981363d116eea9594eeaf742cfd745e5a1bf23499588015d4a06e1e984
-    policy:
-      quotes:
-        pcs:
-          tcb_validity_period: 30
-          min_tcb_evaluation_data_number: 17
-          tdx: {}
-      enclaves: []
+        - YC1NLWFxzwEiFNZDulP51lR++lVGLktMUjnugnwLk/oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - dLVrpu/es9iLCuynva1G/Yz/lCaqWTENGPtEEqYw5QgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - any: {}
       fees: endorsing_node
