@@ -1,4 +1,5 @@
 import { FC, KeyboardEventHandler, useEffect, useState, Fragment } from 'react'
+import Markdown from 'react-markdown'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
 import classes from './index.module.css'
@@ -112,9 +113,11 @@ export const HomePage: FC = () => {
   const mapPrompts = (prompt: string, i: number) => {
     return (
       <Fragment key={i}>
-        <p className={StringUtils.clsx(classes.bubble, classes.me)}>{prompt}</p>
+        <div className={StringUtils.clsx(classes.bubble, classes.me)}>{prompt}</div>
         {i < (conversation?.answers?.length ?? 0) && (
-          <p className={classes.bubble}>{conversation?.answers[i].answer}</p>
+          <div className={classes.bubble}>
+            <Markdown>{conversation?.answers[i].answer}</Markdown>
+          </div>
         )}
       </Fragment>
     )
@@ -138,16 +141,18 @@ export const HomePage: FC = () => {
             >
               <div className={classes.conversation}>
                 {!conversation?.prompts.length && !tempPrompt && (
-                  <p className={StringUtils.clsx(classes.bubble, classes.alert)}>
+                  <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
                     No conversation history available
-                  </p>
+                  </div>
                 )}
                 {!!conversation?.prompts.length && conversation?.prompts.map(mapPrompts)}
-                {tempPrompt && <p className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</p>}
+                {tempPrompt && (
+                  <div className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</div>
+                )}
                 {isWaitingChatBot && (
-                  <p className={StringUtils.clsx(classes.bubble, classes.loading)}>
+                  <div className={StringUtils.clsx(classes.bubble, classes.loading)}>
                     <LoadingIcon />
-                  </p>
+                  </div>
                 )}
                 <ScrollToBottom />
               </div>

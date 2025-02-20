@@ -49,11 +49,12 @@
 }
 
 .bubble {
-  display: inline-block;
   padding: 0.5rem;
   border-radius: 4px;
   max-width: 75%;
+  min-height: fit-content;
   text-align: left;
+  overflow-y: auto;
 
   &.me {
     background-color: var(--brand-blue);
