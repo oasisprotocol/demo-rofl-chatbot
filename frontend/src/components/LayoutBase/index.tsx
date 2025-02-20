@@ -48,7 +48,7 @@ export const LayoutBase: FC<PropsWithChildren<Props>> = ({ children, header }) =
           </div>
           <div className={classes.footerColumn}>
             <a href={OASIS_HOME_PAGE_URL} rel="noopener noreferrer" target="_blank">
-              Oasis Protocol Foundation | 2024
+              Oasis Protocol Foundation | {new Date().getFullYear()}
             </a>
           </div>
         </footer>
@@ -105,7 +105,7 @@ export const LayoutBase: FC<PropsWithChildren<Props>> = ({ children, header }) =
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Oasis Protocol Foundation | 2024
+                Oasis Protocol Foundation | {new Date().getFullYear()}
               </a>
             </span>
           </div>

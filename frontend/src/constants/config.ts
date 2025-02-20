@@ -1,4 +1,4 @@
-export const GITHUB_REPOSITORY_URL = 'https://github.com/oasisprotocol/demo-starter'
+export const GITHUB_REPOSITORY_URL = 'https://github.com/oasisprotocol/demo-rofl-chatbot'
 export const OASIS_DOCS_PAGE_URL = 'https://docs.oasis.io/'
 export const OASIS_HOME_PAGE_URL = 'https://oasisprotocol.org/'
 export const METAMASK_HOME_PAGE_URL = 'https://metamask.io/'
