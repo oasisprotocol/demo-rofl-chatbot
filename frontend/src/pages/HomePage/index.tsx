@@ -8,19 +8,17 @@ import { PromptsAnswers } from '../../types'
 import { StringUtils } from '../../utils/string.utils'
 import { DeleteIcon } from '../../components/icons/DeleteIcon'
 import { SendIcon } from '../../components/icons/SendIcon'
-import { RevealContent } from '../../components/RevealContent'
 import { ScrollToBottom } from '../../components/ScrollToBottom'
 import { LoadingIcon } from '../../components/icons/LoadingIcon'
 
 export const HomePage: FC = () => {
   const {
-    state: { isConnected, isSapphire, isInteractingWithChain, isWaitingChatBot },
+    state: { isConnected, isInteractingWithChain, isWaitingChatBot },
     getPromptsAnswers: web3GetPromptsAnswers,
     ask: web3Ask,
     clear: web3Clear,
   } = useWeb3()
   const [conversation, setConversation] = useState<PromptsAnswers | null>(null)
-  const [conversationRevealLabel, setConversationRevealLabel] = useState<string>()
   const [conversationError, setConversationError] = useState<string | null>(null)
   const [promptValue, setPromptValue] = useState<string>('')
   const [promptValueError, setPromptValueError] = useState<string>()
@@ -29,40 +27,26 @@ export const HomePage: FC = () => {
 
   const fetchConversation = async () => {
     setConversationError(null)
-    setConversationRevealLabel('Please sign message and wait...')
 
     try {
       const promptsAnswers = await web3GetPromptsAnswers()
       setConversation(promptsAnswers)
-      setConversationRevealLabel(undefined)
       setHasBeenRevealedBefore(true)
 
       return Promise.resolve()
     } catch (ex) {
       setConversationError((ex as Error).message)
-      setConversationRevealLabel('Something went wrong! Please try again...')
 
       throw ex
     }
   }
 
   useEffect(() => {
-    if (isSapphire === null) {
-      return
-    }
-
-    if (!isSapphire) {
+    if (isConnected) {
       fetchConversation()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSapphire])
-
-  const handleRevealChanged = (): Promise<void> => {
-    if (!isSapphire) {
-      return Promise.resolve(void 0)
-    }
-    return fetchConversation()
-  }
+  }, [isConnected])
 
   const handleAsk = async () => {
     setPromptValueError(undefined)
@@ -83,7 +67,6 @@ export const HomePage: FC = () => {
 
       if (!hasBeenRevealedBefore) {
         setConversation(null)
-        setConversationRevealLabel('Conversation history is inaccessible, sign a message to reveal it...')
       } else {
         fetchConversation()
       }
@@ -128,35 +111,21 @@ export const HomePage: FC = () => {
       <Card header={<h2>C10l ChatBot 🤖</h2>}>
         {isConnected && (
           <div className={classes.cardContent}>
-            <RevealContent
-              className={classes.revealConversation}
-              revealLabel={!!isSapphire && !!conversation ? undefined : conversationRevealLabel}
-              onRevealChange={() => {
-                if (!isInteractingWithChain) {
-                  return handleRevealChanged()
-                }
-
-                return Promise.reject()
-              }}
-            >
-              <div className={classes.conversation}>
-                {!conversation?.prompts.length && !tempPrompt && (
-                  <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
-                    No conversation history available
-                  </div>
-                )}
-                {!!conversation?.prompts.length && conversation?.prompts.map(mapPrompts)}
-                {tempPrompt && (
-                  <div className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</div>
-                )}
-                {isWaitingChatBot && (
-                  <div className={StringUtils.clsx(classes.bubble, classes.loading)}>
-                    <LoadingIcon />
-                  </div>
-                )}
-                <ScrollToBottom />
-              </div>
-            </RevealContent>
+            <div className={classes.conversation}>
+              {!conversation?.prompts.length && !tempPrompt && (
+                <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
+                  No conversation history available
+                </div>
+              )}
+              {!!conversation?.prompts.length && conversation?.prompts.map(mapPrompts)}
+              {tempPrompt && <div className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</div>}
+              {isWaitingChatBot && (
+                <div className={StringUtils.clsx(classes.bubble, classes.loading)}>
+                  <LoadingIcon />
+                </div>
+              )}
+              <ScrollToBottom />
+            </div>
 
             <div className={classes.cardContentInput}>
               <textarea

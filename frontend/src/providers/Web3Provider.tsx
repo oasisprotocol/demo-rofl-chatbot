@@ -140,6 +140,62 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     [_accountsChanged, _chainChanged, _connect, _disconnect]
   )
 
+  const _getWrappedSigner = async (unwrappedSignerPromise = _getUnwrappedSigner()) => {
+    const { isSapphire } = state
+
+    const signer = await unwrappedSignerPromise
+
+    if (isSapphire) {
+      return wrapEthersSigner(signer)
+    }
+
+    return signer
+  }
+
+  const _getUnwrappedSigner = async () => {
+    const { browserProvider } = state
+
+    return await browserProvider!.getSigner()
+  }
+
+  const getChatBot = async (unwrappedSignerPromise = _getUnwrappedSigner()): Promise<Contract> => {
+    const wrappedSigner = await _getWrappedSigner(unwrappedSignerPromise)
+    const abi = ChatBotAbi.abi
+    return new Contract(VITE_CONTRACT_ADDR, abi, wrappedSigner)
+  }
+
+  const _getAuthInfo = async (
+    chatBot: Contract,
+    unwrappedSignerPromise = _getUnwrappedSigner(),
+    chainId = state.chainId
+  ): Promise<string> => {
+    const { authInfo } = state
+
+    const unwrappedSigner = await unwrappedSignerPromise
+
+    if (!authInfo) {
+      const domain = await chatBot.domain()
+      const siweMessage = new SiweMessage({
+        domain,
+        address: await unwrappedSigner.getAddress(),
+        uri: `http://${domain}`,
+        version: '1',
+        chainId: Number(chainId),
+      }).toMessage()
+      const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
+      const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
+
+      setState(prevState => ({
+        ...prevState,
+        authInfo: retrievedAuthInfo,
+      }))
+
+      return retrievedAuthInfo
+    }
+
+    return authInfo
+  }
+
   const _init = async (account: string, provider: typeof window.ethereum) => {
     try {
       const browserProvider = new BrowserProvider(provider!)
@@ -147,6 +203,9 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
       const network = await browserProvider.getNetwork()
       const chainId = network.chainId
       _setNetworkSpecificVars(chainId, browserProvider)
+
+      const chatBot = await getChatBot(browserProvider.getSigner())
+      await _getAuthInfo(chatBot, browserProvider.getSigner(), chainId)
 
       setState(prevState => ({
         ...prevState,
@@ -167,7 +226,7 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
       if (ex instanceof UnknownNetworkError) {
         throw ex
       } else {
-        throw new Error('[Web3Context] Unable to initialize providers!')
+        throw new Error('[Web3Context] Unable to connect wallet!')
       }
     }
   }
@@ -215,57 +274,6 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     }
 
     return (await browserProvider.getFeeData()).gasPrice ?? 0n
-  }
-
-  const _getWrappedSigner = async () => {
-    const { isSapphire, browserProvider } = state
-
-    if (isSapphire) {
-      const signer = await browserProvider!.getSigner()
-      return wrapEthersSigner(signer)
-    }
-
-    return await browserProvider!.getSigner()
-  }
-
-  const _getUnwrappedSigner = async () => {
-    const { browserProvider } = state
-
-    return await browserProvider!.getSigner()
-  }
-
-  const _getAuthInfo = async (chatBot: Contract): Promise<string> => {
-    const { authInfo, chainId } = state
-
-    const unwrappedSigner = await _getUnwrappedSigner()
-
-    if (!authInfo) {
-      const domain = await chatBot.domain()
-      const siweMessage = new SiweMessage({
-        domain,
-        address: await unwrappedSigner.getAddress(),
-        uri: `http://${domain}`,
-        version: '1',
-        chainId: Number(chainId),
-      }).toMessage()
-      const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
-      const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
-
-      setState(prevState => ({
-        ...prevState,
-        authInfo: retrievedAuthInfo,
-      }))
-
-      return retrievedAuthInfo
-    }
-
-    return authInfo
-  }
-
-  const getChatBot = async (): Promise<Contract> => {
-    const wrappedSigner = await _getWrappedSigner()
-    const abi = ChatBotAbi.abi
-    return new Contract(VITE_CONTRACT_ADDR, abi, wrappedSigner)
   }
 
   const getPromptsAnswers = async (): Promise<PromptsAnswers> => {

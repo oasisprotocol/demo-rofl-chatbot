@@ -32,19 +32,14 @@
   gap: 1rem;
 }
 
-.revealConversation {
+.conversation {
   display: flex;
   flex: 1 1 450px;
   width: 100%;
-}
-
-.conversation {
-  display: flex;
   flex-direction: column;
   gap: 0.5rem;
   max-height: 450px;
   overflow-y: auto;
-  width: 100%;
   text-align: center;
 }
 
