@@ -20,6 +20,7 @@
     "ethers": "^6.10.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.3",
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.27.0",
     "siwe": "^2.3.2"

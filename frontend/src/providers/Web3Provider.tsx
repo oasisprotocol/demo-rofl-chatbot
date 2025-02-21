@@ -3,19 +3,13 @@ import { CHAINS, VITE_NETWORK } from '../constants/config'
 import { handleKnownErrors, handleKnownEthersErrors, UnknownNetworkError } from '../utils/errors'
 import { Web3Context, Web3ProviderContext, Web3ProviderState } from './Web3Context'
 import { useEIP1193 } from '../hooks/useEIP1193'
-import {
-  BrowserProvider,
-  Contract,
-  EthersError,
-  JsonRpcProvider,
-  Signature
-} from 'ethers'
+import { BrowserProvider, Contract, EthersError, JsonRpcProvider, Signature } from 'ethers'
 import { SiweMessage } from 'siwe'
 import { wrapEthersSigner, NETWORKS } from '@oasisprotocol/sapphire-ethers-v6'
 import * as ChatBotAbi from '../../../contracts/out/ChatBot.sol/ChatBot.json'
-import {Answer, PromptsAnswers} from "../types";
+import { Answer, PromptsAnswers } from '../types'
 
-const { VITE_MESSAGE_BOX_ADDR } = import.meta.env
+const { VITE_CONTRACT_ADDR } = import.meta.env
 
 let EVENT_LISTENERS_INITIALIZED = false
 
@@ -28,7 +22,6 @@ const web3ProviderInitialState: Web3ProviderState = {
   chainId: null,
   nativeCurrency: null,
   isInteractingWithChain: false,
-  isWaitingChatBot: false,
   provider: new JsonRpcProvider(import.meta.env.VITE_WEB3_GATEWAY, undefined, {
     staticNetwork: true,
   }),
@@ -55,7 +48,10 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const interactingWithChainWrapper = useCallback(
     <Args extends unknown[], R>(fn: (...args: Args) => Promise<R>) =>
       async (...args: Args): Promise<R> => {
-        setState(prevState => ({ ...prevState, isInteractingWithChain: true }))
+        setState(prevState => ({
+          ...prevState,
+          isInteractingWithChain: true,
+        }))
         try {
           return await fn(...args)
         } catch (e) {
@@ -63,7 +59,10 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
           handleKnownErrors(e as Error)
           throw e
         } finally {
-          setState(prevState => ({ ...prevState, isInteractingWithChain: false }))
+          setState(prevState => ({
+            ...prevState,
+            isInteractingWithChain: false,
+          }))
         }
       },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +94,7 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
       throw new Error('[Web3Context] Browser provider is required!')
     }
 
-    if (!CHAINS.has(chainId)) {
+    if (!CHAINS.has(chainId) || VITE_NETWORK !== chainId) {
       throw new UnknownNetworkError('Unknown network!')
     }
 
@@ -140,6 +139,62 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     [_accountsChanged, _chainChanged, _connect, _disconnect]
   )
 
+  const _getWrappedSigner = async (unwrappedSignerPromise = _getUnwrappedSigner()) => {
+    const { isSapphire } = state
+
+    const signer = await unwrappedSignerPromise
+
+    if (isSapphire) {
+      return wrapEthersSigner(signer)
+    }
+
+    return signer
+  }
+
+  const _getUnwrappedSigner = async () => {
+    const { browserProvider } = state
+
+    return await browserProvider!.getSigner()
+  }
+
+  const getChatBot = async (unwrappedSignerPromise = _getUnwrappedSigner()): Promise<Contract> => {
+    const wrappedSigner = await _getWrappedSigner(unwrappedSignerPromise)
+    const abi = ChatBotAbi.abi
+    return new Contract(VITE_CONTRACT_ADDR, abi, wrappedSigner)
+  }
+
+  const _getAuthInfo = async (
+    chatBot: Contract,
+    unwrappedSignerPromise = _getUnwrappedSigner(),
+    chainId = state.chainId
+  ): Promise<string> => {
+    const { authInfo } = state
+
+    const unwrappedSigner = await unwrappedSignerPromise
+
+    if (!authInfo) {
+      const domain = await chatBot.domain()
+      const siweMessage = new SiweMessage({
+        domain,
+        address: await unwrappedSigner.getAddress(),
+        uri: `http://${domain}`,
+        version: '1',
+        chainId: Number(chainId),
+      }).toMessage()
+      const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
+      const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
+
+      setState(prevState => ({
+        ...prevState,
+        authInfo: retrievedAuthInfo,
+      }))
+
+      return retrievedAuthInfo
+    }
+
+    return authInfo
+  }
+
   const _init = async (account: string, provider: typeof window.ethereum) => {
     try {
       const browserProvider = new BrowserProvider(provider!)
@@ -147,6 +202,9 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
       const network = await browserProvider.getNetwork()
       const chainId = network.chainId
       _setNetworkSpecificVars(chainId, browserProvider)
+
+      const chatBot = await getChatBot(browserProvider.getSigner())
+      await _getAuthInfo(chatBot, browserProvider.getSigner(), chainId)
 
       setState(prevState => ({
         ...prevState,
@@ -167,7 +225,7 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
       if (ex instanceof UnknownNetworkError) {
         throw ex
       } else {
-        throw new Error('[Web3Context] Unable to initialize providers!')
+        throw new Error('[Web3Context] Unable to connect wallet!')
       }
     }
   }
@@ -217,94 +275,41 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     return (await browserProvider.getFeeData()).gasPrice ?? 0n
   }
 
-  const _getWrappedSigner = async () => {
-    const { isSapphire, browserProvider } = state
-
-    if (isSapphire) {
-      const signer = await browserProvider!.getSigner()
-      return wrapEthersSigner(signer)
-    }
-
-    return await browserProvider!.getSigner()
-  }
-
-  const _getUnwrappedSigner = async () => {
-    const { browserProvider } = state
-
-    return await browserProvider!.getSigner()
-  }
-
-  const _getAuthInfo = async (chatBot: Contract): Promise<string> => {
-    const { authInfo, chainId } = state
-
-    const unwrappedSigner = await _getUnwrappedSigner()
-
-    if (!authInfo) {
-      const domain = await chatBot.domain()
-      const siweMessage = new SiweMessage({
-        domain,
-        address: await unwrappedSigner.getAddress(),
-        uri: `http://${domain}`,
-        version: '1',
-        chainId: Number(chainId),
-      }).toMessage()
-      const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
-      const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
-
-      setState(prevState => ({
-        ...prevState,
-        authInfo: retrievedAuthInfo,
-      }))
-
-      return retrievedAuthInfo
-    }
-
-    return authInfo
-  }
-
-  const getChatBot = async (): Promise<Contract> => {
-    const wrappedSigner = await _getWrappedSigner()
-    const abi = ChatBotAbi.abi
-    return new Contract(VITE_MESSAGE_BOX_ADDR, abi, wrappedSigner)
-  }
-
   const getPromptsAnswers = async (): Promise<PromptsAnswers> => {
     const chatBot = await getChatBot()
     const authInfo = await _getAuthInfo(chatBot)
-    const [prompts, answersRaw] = await Promise.all([chatBot.getPrompts(authInfo, state.account), chatBot.getAnswers(authInfo, state.account)])
+    const [prompts, answersRaw] = await Promise.all([
+      chatBot.getPrompts(authInfo, state.account),
+      chatBot.getAnswers(authInfo, state.account),
+    ])
     let answers: Answer[] = []
 
     // Align prompts with (potentially empty) answers.
-    for (let i=0, j=0; i<prompts.length; i++) {
+    for (let i = 0, j = 0; i < prompts.length; i++) {
       let answer = ''
-      if (j<answersRaw.length && answersRaw[j].promptId==i) {
-        answer = answersRaw[j].answer.substring(answersRaw[j].answer.indexOf("</think>") + 8) // trim off <think>...</think>,
+      if (j < answersRaw.length && answersRaw[j].promptId == i) {
+        answer = answersRaw[j].answer.replaceAll(/<think>.*<\/think>/gs, '')
         j++
       }
-      answers.push({
-        answer,
-        promptId: i
-      });
+
+      if (answer) {
+        answers.push({
+          answer,
+          promptId: i,
+        })
+      }
     }
-    return { prompts, answers, htmlContent: '' }
+    return { prompts, answers }
   }
 
   const appendPrompt = async (message: string): Promise<void> => {
     const chatBot = await getChatBot()
-    const { hash } = await chatBot.appendPrompt(message)
-    const filter = chatBot.filters.AnswerSubmitted(state.account)
-    chatBot.on(filter, async (sender: string) => {
-      console.log("AnswerSubmitted sender: " + sender)
-      setState(prevState => ({ ...prevState, isWaitingChatBot: false }))
-    })
-    setState(prevState => ({ ...prevState, isWaitingChatBot: true }))
-    await getTransaction(hash)
-    setState(prevState => ({ ...prevState, isInteractingWithChain: false }))
+    return await chatBot.appendPrompt(message)
   }
 
   const clearPrompt = async (): Promise<void> => {
     const chatBot = await getChatBot()
-    const { hash } = await chatBot.clearPrompt({ gasLimit: 1000000 })
+    const { hash } = await chatBot.clearPrompt({ gasLimit: 10000000 })
     await getTransaction(hash)
   }
 

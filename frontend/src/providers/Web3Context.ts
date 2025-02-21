@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import { BrowserProvider, JsonRpcProvider, TransactionResponse } from 'ethers'
-import {PromptsAnswers} from '../types'
+import { PromptsAnswers } from '../types'
 
 export interface Web3ProviderState {
   isConnected: boolean
@@ -14,7 +14,6 @@ export interface Web3ProviderState {
     decimals: number
   } | null
   isInteractingWithChain: boolean
-  isWaitingChatBot: boolean
   isSapphire: boolean | null
   chainId: bigint | null
   provider: JsonRpcProvider
