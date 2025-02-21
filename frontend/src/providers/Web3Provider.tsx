@@ -3,7 +3,7 @@ import { CHAINS, VITE_NETWORK } from '../constants/config'
 import { handleKnownErrors, handleKnownEthersErrors, UnknownNetworkError } from '../utils/errors'
 import { Web3Context, Web3ProviderContext, Web3ProviderState } from './Web3Context'
 import { useEIP1193 } from '../hooks/useEIP1193'
-import { BrowserProvider, Contract, EthersError, getAddress, JsonRpcProvider, Signature } from 'ethers'
+import { BrowserProvider, Contract, EthersError, JsonRpcProvider, Signature } from 'ethers'
 import { SiweMessage } from 'siwe'
 import { wrapEthersSigner, NETWORKS } from '@oasisprotocol/sapphire-ethers-v6'
 import * as ChatBotAbi from '../../../contracts/out/ChatBot.sol/ChatBot.json'
@@ -22,7 +22,6 @@ const web3ProviderInitialState: Web3ProviderState = {
   chainId: null,
   nativeCurrency: null,
   isInteractingWithChain: false,
-  isWaitingChatBot: false,
   provider: new JsonRpcProvider(import.meta.env.VITE_WEB3_GATEWAY, undefined, {
     staticNetwork: true,
   }),
@@ -292,50 +291,20 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
         answer = answersRaw[j].answer.replaceAll(/<(think|\/think)>/g, '')
         j++
       }
-      answers.push({
-        answer,
-        promptId: i,
-      })
+
+      if (answer) {
+        answers.push({
+          answer,
+          promptId: i,
+        })
+      }
     }
     return { prompts, answers }
   }
 
-  const appendPrompt = async (message: string, txSubmittedCb: () => void): Promise<void> => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null
+  const appendPrompt = async (message: string): Promise<void> => {
     const chatBot = await getChatBot()
-    const filter = chatBot.filters.AnswerSubmitted(state.account)
-
-    return new Promise(async (resolve, reject) => {
-      const answerSubmittedListener = async ({ args }: { args: string[] }) => {
-        clearTimeout(timeoutId!)
-
-        if (args.includes(getAddress(state.account!))) {
-          setState(prevState => ({ ...prevState, isWaitingChatBot: false }))
-          resolve()
-        }
-      }
-
-      try {
-        await chatBot.appendPrompt(message)
-        txSubmittedCb()
-
-        setState(prevState => ({ ...prevState, isWaitingChatBot: true }))
-
-        timeoutId = setTimeout(() => {
-          chatBot.off(filter, answerSubmittedListener)
-
-          setState(prevState => ({ ...prevState, isWaitingChatBot: false }))
-          reject('TIMEOUT')
-        }, 60000)
-
-        chatBot.once(filter, answerSubmittedListener)
-      } catch (ex) {
-        clearTimeout(timeoutId!)
-        chatBot.off(filter, answerSubmittedListener)
-        setState(prevState => ({ ...prevState, isWaitingChatBot: false }))
-        reject(ex)
-      }
-    })
+    return await chatBot.appendPrompt(message)
   }
 
   const clearPrompt = async (): Promise<void> => {

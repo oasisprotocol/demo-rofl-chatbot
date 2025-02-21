@@ -14,7 +14,6 @@ export interface Web3ProviderState {
     decimals: number
   } | null
   isInteractingWithChain: boolean
-  isWaitingChatBot: boolean
   isSapphire: boolean | null
   chainId: bigint | null
   provider: JsonRpcProvider
@@ -29,7 +28,7 @@ export interface Web3ProviderContext {
   getGasPrice: () => Promise<bigint>
   isProviderAvailable: () => Promise<boolean>
   getPromptsAnswers: () => Promise<PromptsAnswers>
-  ask: (prompt: string, txSubmittedCb: () => void) => Promise<void>
+  ask: (prompt: string) => Promise<void>
   clear: () => Promise<void>
 }
 

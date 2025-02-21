@@ -10,19 +10,20 @@ import { DeleteIcon } from '../../components/icons/DeleteIcon'
 import { SendIcon } from '../../components/icons/SendIcon'
 import { ScrollToBottom } from '../../components/ScrollToBottom'
 import { LoadingIcon } from '../../components/icons/LoadingIcon'
+import { retry } from '../../utils/retry'
 
 export const HomePage: FC = () => {
   const {
-    state: { isConnected, isInteractingWithChain, isWaitingChatBot },
+    state: { isConnected, isInteractingWithChain },
     getPromptsAnswers: web3GetPromptsAnswers,
     ask: web3Ask,
     clear: web3Clear,
   } = useWeb3()
+  const [isWaitingChatBot, setIsWaitingChatBot] = useState(false)
   const [conversation, setConversation] = useState<PromptsAnswers | null>(null)
   const [conversationError, setConversationError] = useState<string | null>(null)
   const [promptValue, setPromptValue] = useState<string>('')
   const [promptValueError, setPromptValueError] = useState<string>()
-  const [hasBeenRevealedBefore, setHasBeenRevealedBefore] = useState(false)
   const [tempPrompt, setTempPrompt] = useState<string | null>(null)
 
   const fetchConversation = async () => {
@@ -31,9 +32,8 @@ export const HomePage: FC = () => {
     try {
       const promptsAnswers = await web3GetPromptsAnswers()
       setConversation(promptsAnswers)
-      setHasBeenRevealedBefore(true)
 
-      return Promise.resolve()
+      return promptsAnswers
     } catch (ex) {
       setConversationError((ex as Error).message)
 
@@ -49,6 +49,8 @@ export const HomePage: FC = () => {
   }, [isConnected])
 
   const handleAsk = async () => {
+    if (isWaitingChatBot) return
+
     setPromptValueError(undefined)
 
     if (!promptValue) {
@@ -58,21 +60,33 @@ export const HomePage: FC = () => {
     }
 
     try {
-      await web3Ask(promptValue, () => {
-        setTempPrompt(promptValue)
-        setPromptValue('')
-      })
-      setTempPrompt(null)
+      await web3Ask(promptValue)
+
+      setIsWaitingChatBot(true)
+      setTempPrompt(promptValue)
       setPromptValue('')
 
-      if (!hasBeenRevealedBefore) {
-        setConversation(null)
-      } else {
-        fetchConversation()
-      }
+      const promptsAnswers = await retry(
+        web3GetPromptsAnswers,
+        _conversation => {
+          if (_conversation.answers.length > (conversation?.answers.length ?? 0)) {
+            return _conversation
+          }
+
+          throw new Error('Conversation has not been updated!')
+        },
+        10,
+        5000
+      )
+      setConversation(promptsAnswers)
+
+      setTempPrompt(null)
+      setPromptValue('')
     } catch (ex) {
       setPromptValue(promptValue)
       setPromptValueError((ex as Error).message)
+    } finally {
+      setIsWaitingChatBot(false)
     }
   }
 
