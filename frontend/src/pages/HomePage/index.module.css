@@ -44,39 +44,52 @@
 }
 
 .bubble {
-  padding: 0.5rem;
-  border-radius: 4px;
-  max-width: 75%;
-  min-height: fit-content;
-  text-align: left;
-  overflow-y: auto;
+  display: flex;
+  flex: 0 1 auto;
+
+  > div {
+    padding: 0.5rem;
+    border-radius: 4px;
+    max-width: 99%;
+    text-align: left;
+    overflow-x: auto;
+    min-height: 0;
+  }
 
   &.me {
-    background-color: var(--brand-blue);
-    color: var(--white);
-    border: 2px var(--brand-blue) solid;
-    margin-left: auto;
+    > div {
+      background-color: var(--brand-blue);
+      color: var(--white);
+      border: 2px var(--brand-blue) solid;
+      margin-left: auto;
+    }
   }
 
   &.alert {
-    background-color: var(--gray);
-    color: var(--white);
-    border: 2px var(--gray) solid;
-    margin: 0 auto;
-    text-align: center;
+    > div {
+      background-color: var(--gray);
+      color: var(--white);
+      border: 2px var(--gray) solid;
+      margin: 0 auto;
+      text-align: center;
+    }
   }
 
   &.loading {
-    display: flex;
-    justify-content: center;
-    width: 50px;
+    > div {
+      display: flex;
+      justify-content: center;
+      width: 50px;
+    }
   }
 
   &:not(.me)&:not(.alert) {
-    background-color: var(--gray-light);
-    color: var(--brand-extra-dark-75);
-    border: 2px var(--gray-light) solid;
-    margin-right: auto;
+    > div {
+      background-color: var(--gray-light);
+      color: var(--brand-extra-dark-75);
+      border: 2px var(--gray-light) solid;
+      margin-right: auto;
+    }
   }
 }
 

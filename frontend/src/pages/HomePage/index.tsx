@@ -75,7 +75,7 @@ export const HomePage: FC = () => {
 
           throw new Error('Conversation has not been updated!')
         },
-        10,
+        20,
         5000
       )
       setConversation(promptsAnswers)
@@ -110,10 +110,14 @@ export const HomePage: FC = () => {
   const mapPrompts = (prompt: string, i: number) => {
     return (
       <Fragment key={i}>
-        <div className={StringUtils.clsx(classes.bubble, classes.me)}>{prompt}</div>
+        <div className={StringUtils.clsx(classes.bubble, classes.me)}>
+          <div>{prompt}</div>
+        </div>
         {i < (conversation?.answers?.length ?? 0) && (
           <div className={classes.bubble}>
-            <Markdown>{conversation?.answers[i].answer}</Markdown>
+            <div>
+              <Markdown>{conversation?.answers[i].answer}</Markdown>
+            </div>
           </div>
         )}
       </Fragment>
@@ -128,14 +132,20 @@ export const HomePage: FC = () => {
             <div className={classes.conversation}>
               {!conversation?.prompts.length && !tempPrompt && (
                 <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
-                  No conversation history available
+                  <div>No conversation history available</div>
                 </div>
               )}
               {!!conversation?.prompts.length && conversation?.prompts.map(mapPrompts)}
-              {tempPrompt && <div className={StringUtils.clsx(classes.bubble, classes.me)}>{tempPrompt}</div>}
+              {tempPrompt && (
+                <div className={StringUtils.clsx(classes.bubble, classes.me)}>
+                  <div>{tempPrompt}</div>
+                </div>
+              )}
               {isWaitingChatBot && (
                 <div className={StringUtils.clsx(classes.bubble, classes.loading)}>
-                  <LoadingIcon />
+                  <div>
+                    <LoadingIcon />
+                  </div>
                 </div>
               )}
               <ScrollToBottom />
