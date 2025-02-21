@@ -288,7 +288,7 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     for (let i = 0, j = 0; i < prompts.length; i++) {
       let answer = ''
       if (j < answersRaw.length && answersRaw[j].promptId == i) {
-        answer = answersRaw[j].answer.replaceAll(/<(think|\/think)>/g, '')
+        answer = answersRaw[j].answer.replaceAll(/<think>.*<\/think>/gs, '')
         j++
       }
 
