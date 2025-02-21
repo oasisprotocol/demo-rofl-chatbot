@@ -69,13 +69,16 @@ export const HomePage: FC = () => {
       const promptsAnswers = await retry(
         web3GetPromptsAnswers,
         _conversation => {
-          if (_conversation.answers.length > (conversation?.answers.length ?? 0)) {
+          // Take one prompt in future, or take the latest one submitted
+          const lastPromptId = Math.max(conversation?.prompts.length ?? 0, _conversation.prompts.length - 1)
+
+          if (_conversation.answers.find(({ promptId }) => lastPromptId === promptId)) {
             return _conversation
           }
 
           throw new Error('Conversation has not been updated!')
         },
-        20,
+        100,
         5000
       )
       setConversation(promptsAnswers)
