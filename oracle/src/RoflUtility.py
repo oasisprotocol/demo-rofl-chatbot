@@ -13,12 +13,15 @@ class RoflUtility:
         transport = None
         if self.url and not self.url.startswith('http'):
             transport = httpx.HTTPTransport(uds=self.url)
+            print(f"Using HTTP socket: {self.url}")
         elif not self.url:
             transport = httpx.HTTPTransport(uds=self.ROFL_SOCKET_PATH)
+            print(f"Using unix domain socket: {self.ROFL_SOCKET_PATH}")
 
         client = httpx.Client(transport=transport)
 
         url = self.url if self.url and self.url.startswith('http') else "http://localhost"
+        print(f"  Posting {payload} to {url+path}")
         response = client.post(url + path, json=payload)
         response.raise_for_status()
         return response.json()
@@ -31,23 +34,23 @@ class RoflUtility:
 
         path = '/rofl/v1/keys/generate'
 
-        print(f"Fetching oracle key from {self.url+path}")
-
         response = self._appd_post(path, payload)
         return response["key"]
 
     def submit_tx(self, tx: TxParams) -> str:
         payload = {
             "tx": {
-                "eth": {
-                    **tx
+                "kind": "eth",
+                "data": {
+                    "gas_limit": tx["gas"],
+                    "to": tx["to"],
+                    "value": tx["value"],
+                    "data": tx["data"],
                 }
             },
-            "encrypt": False
+            "encrypted": False
         }
 
         path = '/rofl/v1/tx/sign-submit'
-
-        print(f"Submitting {payload} to {self.url+path}")
 
         return self._appd_post(path, payload)

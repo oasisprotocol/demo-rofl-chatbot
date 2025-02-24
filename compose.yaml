@@ -8,6 +8,8 @@ services:
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
 
   oracle:
-    image: "ghcr.io/oasisprotocol/demo-rofl-chatbot:latest@sha256:85ed458a550e232385a391cb29b776c7b1c089f370c920b2de8c36bf2bacf1e7"
+    image: "ghcr.io/oasisprotocol/demo-rofl-chatbot:latest@sha256:df9d709f1c6301e07d6b6ed06ba07a8234e0399b42539c13e90a644c417b4300"
     entrypoint: /bin/sh -c 'python main.py --network https://testnet.sapphire.oasis.io --ollama-address http://ollama:11434 0xD20Bea4e8CA596891ed2c97fdEca86aF7821aCC1'
     restart: on-failure
+    volumes:
+      - /run/rofl-appd.sock:/run/rofl-appd.sock

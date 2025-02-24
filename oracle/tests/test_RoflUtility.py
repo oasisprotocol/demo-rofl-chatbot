@@ -106,9 +106,9 @@ class TestRoflUtility(unittest.TestCase):
         with self.assertRaises(httpx.HTTPError):
             self.rofl_utility.fetch_key("test_id")
 
-        # Test error handling in submit_tx
+        # Test error handling in submit_tx, no gas
         with self.assertRaises(httpx.HTTPError):
-            self.rofl_utility.submit_tx({"to": "0x123", "value": 1000})
+            self.rofl_utility.submit_tx({"gas": 0, "to": "0x123", "value": 1000, "data": ""})
 
 if __name__ == '__main__':
     unittest.main()
