@@ -111,15 +111,17 @@ export const HomePage: FC = () => {
   }
 
   const mapPrompts = (prompt: string, i: number) => {
+    const answerToPromptId = conversation?.answers?.find(({ promptId }) => promptId === i)
+
     return (
       <Fragment key={i}>
         <div className={StringUtils.clsx(classes.bubble, classes.me)}>
           <div>{prompt}</div>
         </div>
-        {i < (conversation?.answers?.length ?? 0) && (
+        {answerToPromptId && (
           <div className={classes.bubble}>
             <div>
-              <Markdown>{conversation?.answers[i].answer}</Markdown>
+              <Markdown>{answerToPromptId.answer}</Markdown>
             </div>
           </div>
         )}
