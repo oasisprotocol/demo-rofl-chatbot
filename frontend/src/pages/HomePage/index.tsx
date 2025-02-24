@@ -69,7 +69,7 @@ export const HomePage: FC = () => {
       const promptsAnswers = await retry(
         web3GetPromptsAnswers,
         _conversation => {
-          // Take one prompt in future, or take the latest one submitted
+          // Take one prompt in the future, or take the latest one submitted
           const lastPromptId = Math.max(conversation?.prompts.length ?? 0, _conversation.prompts.length - 1)
 
           if (_conversation.answers.find(({ promptId }) => lastPromptId === promptId)) {
