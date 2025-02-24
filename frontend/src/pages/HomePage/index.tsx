@@ -78,8 +78,8 @@ export const HomePage: FC = () => {
 
           throw new Error('Conversation has not been updated!')
         },
-        100,
-        5000
+        50,
+        6000
       )
       setConversation(promptsAnswers)
 
