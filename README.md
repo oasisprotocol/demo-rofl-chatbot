@@ -25,17 +25,52 @@ git submodule init
 git submodule update
 ```
 
+## Prerequisites
+
+The easiest way to spin up all components described above is to use:
+
+- [Podman] version 4.9.x or above
+- [Podman Compose] version 1.3.x or above
+
+[Podman]: https://podman.io/
+[Podman Compose]: https://github.com/containers/podman-compose
+
 ## Localnet deployment
 
+
 ```shell
-docker compose -f compose.localnet.yaml up
+podman-compose -f compose.localnet.yaml up
 ```
 
-Open your web browser at `http://localnet:5173`.
-
+Once all containers are up and running, open your web browser at
+`http://localnet:5173`.
 
 ## Testnet deployment
 
-1. `oasis rofl build`
+1. `podman build -f Dockerfile.oracle -t ghcr.io/oasisprotocol/demo-rofl-chatbot:latest .`
 
-2. Enable the ROFL app ID in your `oasis-node`
+3. `podman push ghcr.io/oasisprotocol/demo-rofl-chatbot:latest`
+
+4. Update `compose.yaml` with the obtained `@sha256:...` from ghcr above
+
+5. `oasis rofl build --update-manifest`
+
+6. `oasis rofl update`
+
+7. Copy over `demo-rofl-chatbot.default.orc` to your [Oasis node]
+
+8. Add a path to your .orc file to `runtime.paths` in `config.yml` of your
+   Oasis node and restart it.
+
+9. `cd frontend; yarn; yarn build` and copy the content of `dist` folder to the
+   root of your web server.
+
+[Oasis node]: https://docs.oasis.io/node/run-your-node/paratime-client-node#configuring-tee-paratime-client-node
+
+### Troubleshooting
+
+- In case of persistent storage image redundancy error on your Oasis node,
+  remove the
+  `/serverdir/runtimes/images/000000000000000000000000000000000000000000000000a6d1e3ebf60dff6c/rofl.rofl1qrtetspnld9efpeasxmryl6nw9mgllr0euls3dwn/`
+  folder.
+
