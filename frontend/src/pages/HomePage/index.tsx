@@ -69,7 +69,7 @@ export const HomePage: FC = () => {
       const promptsAnswers = await retry(
         web3GetPromptsAnswers,
         _conversation => {
-          // Take one prompt in future, or take the latest one submitted
+          // Take one prompt in the future, or take the latest one submitted
           const lastPromptId = Math.max(conversation?.prompts.length ?? 0, _conversation.prompts.length - 1)
 
           if (_conversation.answers.find(({ promptId }) => lastPromptId === promptId)) {
@@ -78,8 +78,8 @@ export const HomePage: FC = () => {
 
           throw new Error('Conversation has not been updated!')
         },
-        100,
-        5000
+        50,
+        6000
       )
       setConversation(promptsAnswers)
 
@@ -111,15 +111,17 @@ export const HomePage: FC = () => {
   }
 
   const mapPrompts = (prompt: string, i: number) => {
+    const answerToPromptId = conversation?.answers?.find(({ promptId }) => promptId === i)
+
     return (
       <Fragment key={i}>
         <div className={StringUtils.clsx(classes.bubble, classes.me)}>
           <div>{prompt}</div>
         </div>
-        {i < (conversation?.answers?.length ?? 0) && (
+        {answerToPromptId && (
           <div className={classes.bubble}>
             <div>
-              <Markdown>{conversation?.answers[i].answer}</Markdown>
+              <Markdown>{answerToPromptId.answer}</Markdown>
             </div>
           </div>
         )}
