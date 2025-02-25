@@ -1,4 +1,5 @@
 import httpx
+import json
 import typing
 from web3.types import TxParams
 
@@ -21,8 +22,8 @@ class RoflUtility:
         client = httpx.Client(transport=transport)
 
         url = self.url if self.url and self.url.startswith('http') else "http://localhost"
-        print(f"  Posting {payload} to {url+path}")
-        response = client.post(url + path, json=payload)
+        print(f"  Posting {json.dumps(payload)} to {url+path}")
+        response = client.post(url + path, json=payload, timeout=None)
         response.raise_for_status()
         return response.json()
 
@@ -43,12 +44,12 @@ class RoflUtility:
                 "kind": "eth",
                 "data": {
                     "gas_limit": tx["gas"],
-                    "to": tx["to"],
+                    "to": tx["to"].lstrip("0x"),
                     "value": tx["value"],
-                    "data": tx["data"],
-                }
+                    "data": tx["data"].lstrip("0x"),
+                },
             },
-            "encrypted": False
+            "encrypted": False,
         }
 
         path = '/rofl/v1/tx/sign-submit'
