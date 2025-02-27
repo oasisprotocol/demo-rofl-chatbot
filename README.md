@@ -49,9 +49,11 @@ Once all containers are up and running, open your web browser at
 
 1. `podman build -f Dockerfile.oracle -t ghcr.io/oasisprotocol/demo-rofl-chatbot:latest .`
 
-3. `podman push ghcr.io/oasisprotocol/demo-rofl-chatbot:latest`
+3. `podman push --digestfile demo-rofl-chatbot.default.orc.digest ghcr.io/oasisprotocol/demo-rofl-chatbot:latest`
 
-4. Update `compose.yaml` with the obtained `@sha256:...` from ghcr above
+4. Update `compose.yaml` `services.oracle.image` field with
+   `ghcr.io/oasisprotocol/demo-rofl-chatbot:latest@sha256:` followed by the content of
+   `demo-rofl-chatbot.default.orc.digest`
 
 5. `oasis rofl build --update-manifest`
 
