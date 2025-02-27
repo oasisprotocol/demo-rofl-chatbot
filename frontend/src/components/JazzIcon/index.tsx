@@ -1,3 +1,4 @@
+// @ts-ignore
 import createJazzIcon from '@metamask/jazzicon'
 import classes from './index.module.css'
 import { FC, memo, useEffect, useRef } from 'react'
