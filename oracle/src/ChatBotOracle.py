@@ -28,30 +28,29 @@ class ChatBotOracle:
             print(f"Contract oracle {contract_addr} does not match our address {self.w3.eth.default_account}, updating...",)
             tx_params = self.contract.functions.setOracle(self.w3.eth.default_account).build_transaction({'gasPrice': self.w3.eth.gas_price})
             tx_hash = self.rofl_utility.submit_tx(tx_params)
+            print(f"Got receipt {tx_hash} {dir(tx_hash)}")
             tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
             print(f"Updated. Transaction hash: {tx_receipt.transactionHash.hex()}")
         else:
             print(f"Contract oracle {contract_addr} matches our address {self.w3.eth.default_account}")
 
     async def log_loop(self, poll_interval):
+        print(f"Listening for prompts...", flush=True)
         while True:
             logs = self.contract.events.PromptSubmitted().get_logs(fromBlock=self.w3.eth.block_number)
             for log in logs:
                 submitter = log.args.sender
                 print(f"New prompt submitted by {submitter}")
                 prompts = self.retrieve_prompts(submitter)
-                print(f"debug prompts: {prompts}")
                 print(f"Got prompts from {submitter}")
                 answers = self.retrieve_answers(submitter)
                 print(f"Got answers from {submitter}")
-                print(f"debug existing answers: {answers}")
                 if len(answers)>0 and answers[-1][0] == len(prompts)-1: # check promptId
                     print(f"Last prompt already answered, skipping")
                     break
-                print(f"Asking chat bot")
+                print(f"Asking chat bot", flush=True)
                 answer = self.ask_chat_bot(prompts)
-                print(f"debug new answer: {answer}")
-                print(f"Storing chat bot answer for {submitter}")
+                print(f"Storing chat bot answer for {submitter}", flush=True)
                 self.submit_answer(answer, len(prompts)-1, submitter)
             await asyncio.sleep(poll_interval)
 

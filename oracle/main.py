@@ -51,6 +51,7 @@ def main():
 
     arguments = parser.parse_args()
 
+    print(f"Starting ChatBot Oracle service. Using contract {arguments.contract_address} on {arguments.network}.")
     rofl_utility = RoflUtility(arguments.kms)
 
     secret = arguments.secret
