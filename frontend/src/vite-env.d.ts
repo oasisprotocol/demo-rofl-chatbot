@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+declare module '@metamask/jazzicon' {
+  const jazzicon: (diameter: number, seed: number) => HTMLDivElement
+  export default jazzicon
+}
+
 declare const APP_VERSION: string
 declare const BUILD_COMMIT: string
 declare const BUILD_DATETIME: number
