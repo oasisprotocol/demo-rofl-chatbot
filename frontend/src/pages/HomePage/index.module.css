@@ -27,6 +27,7 @@
 
 .cardContent {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   width: 100%;
   gap: 1rem;
@@ -34,11 +35,10 @@
 
 .conversation {
   display: flex;
-  flex: 1 1 450px;
+  flex: 1 1 auto;
   width: 100%;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 450px;
   overflow-y: auto;
   text-align: center;
 }
@@ -102,4 +102,12 @@
 .textareaInput {
   width: 100%;
   resize: none;
+}
+
+
+@media screen and (max-width: 1000px) {
+  .conversation {
+    flex: 1 1 300px;
+    max-height: 300px;
+  }
 }
