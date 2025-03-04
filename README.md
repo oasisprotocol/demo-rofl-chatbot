@@ -1,7 +1,7 @@
 # Demo Chatbot running on Oasis ROFL
 
 This is a simple showcase of a ollama-based chatbot running inside Oasis ROFL
-TDX.
+TDX. Check the live demo running on Sapphire Testnet [here][live-demo].
 
 It consists of the following components:
 
@@ -24,6 +24,8 @@ submodules:
 git submodule init
 git submodule update
 ```
+
+[live-demo]: https://playground.oasis.io/demo-rofl-chatbot
 
 ## Prerequisites
 
