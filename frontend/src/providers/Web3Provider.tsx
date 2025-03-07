@@ -8,6 +8,7 @@ import { SiweMessage } from 'siwe'
 import { wrapEthersSigner, NETWORKS } from '@oasisprotocol/sapphire-ethers-v6'
 import * as ChatBotAbi from '../../../contracts/out/ChatBot.sol/ChatBot.json'
 import { Answer, PromptsAnswers } from '../types'
+import { usePrevious } from '../hooks/usePrevious'
 
 const { VITE_CONTRACT_ADDR } = import.meta.env
 
@@ -40,8 +41,16 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     ...web3ProviderInitialState,
   })
 
+  const previousAccount = usePrevious(state.account)
+
   useEffect(() => {
-    setState(prevState => ({ ...prevState, isInteractingWithChain: false }))
+    if (previousAccount && previousAccount !== state.account) {
+      setState(prevState => ({
+        ...prevState,
+        isInteractingWithChain: false,
+        authInfo: null,
+      }))
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.account])
 
@@ -167,29 +176,36 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     chatBot: Contract,
     unwrappedSignerPromise = _getUnwrappedSigner(),
     chainId = state.chainId
-  ): Promise<string> => {
+  ): Promise<string | null> => {
     const { authInfo } = state
 
     const unwrappedSigner = await unwrappedSignerPromise
 
     if (!authInfo) {
-      const domain = await chatBot.domain()
-      const siweMessage = new SiweMessage({
-        domain,
-        address: await unwrappedSigner.getAddress(),
-        uri: `http://${domain}`,
-        version: '1',
-        chainId: Number(chainId),
-      }).toMessage()
-      const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
-      const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
+      try {
+        const domain = await chatBot.domain()
+        const siweMessage = new SiweMessage({
+          domain,
+          address: await unwrappedSigner.getAddress(),
+          uri: `http://${domain}`,
+          version: '1',
+          chainId: Number(chainId),
+        }).toMessage()
+        const signature = Signature.from(await unwrappedSigner.signMessage(siweMessage))
+        const retrievedAuthInfo = await chatBot.login(siweMessage, signature)
 
-      setState(prevState => ({
-        ...prevState,
-        authInfo: retrievedAuthInfo,
-      }))
+        setState(prevState => ({
+          ...prevState,
+          authInfo: retrievedAuthInfo,
+        }))
 
-      return retrievedAuthInfo
+        return retrievedAuthInfo
+      } catch (ex) {
+        setState(prevState => ({
+          ...prevState,
+          isConnected: false,
+        }))
+      }
     }
 
     return authInfo
@@ -275,9 +291,12 @@ export const Web3ContextProvider: FC<PropsWithChildren> = ({ children }) => {
     return (await browserProvider.getFeeData()).gasPrice ?? 0n
   }
 
-  const getPromptsAnswers = async (): Promise<PromptsAnswers> => {
+  const getPromptsAnswers = async (): Promise<PromptsAnswers | null> => {
     const chatBot = await getChatBot()
     const authInfo = await _getAuthInfo(chatBot)
+
+    if (!authInfo) return null
+
     const [prompts, answersRaw] = await Promise.all([
       chatBot.getPrompts(authInfo, state.account),
       chatBot.getAnswers(authInfo, state.account),
