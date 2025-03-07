@@ -1,3 +1,16 @@
+.notification {
+  position: sticky;
+  z-index: 999;
+  margin: 0 auto;
+  max-width: 620px;
+  display: flex;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  background: var(--gray);
+  color: var(--brand-extra-dark);
+  font-size: 14px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -16,6 +29,10 @@
 }
 
 @media screen and (max-width: 1000px) {
+  .notification {
+    margin: 0 auto 1rem;
+  }
+
   .header {
     padding: 0;
     margin-bottom: 2.375rem;

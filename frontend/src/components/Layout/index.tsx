@@ -8,6 +8,7 @@ import { Button } from '../Button'
 import { StringUtils } from '../../utils/string.utils'
 import { LayoutBase } from '../LayoutBase'
 import { LogoIcon } from '../icons/LogoIcon'
+import { VITE_NETWORK } from '../../constants/config'
 
 export const Layout: FC = () => {
   const {
@@ -18,10 +19,26 @@ export const Layout: FC = () => {
   return (
     <LayoutBase
       header={
-        <header className={classes.header}>
-          <LogoIcon />
-          <ConnectWallet inline={isMobileScreen} />
-        </header>
+        <>
+          {(VITE_NETWORK === 23293n || VITE_NETWORK === 23295n) && (
+            <div className={classes.notification}>
+              <p>
+                Don't have any TEST tokens on Sapphire Testnet? Get some from our{' '}
+                <a
+                  href="https://faucet.testnet.oasis.dev/?paratime=sapphire"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Testnet faucet
+                </a>
+              </p>
+            </div>
+          )}
+          <header className={classes.header}>
+            <LogoIcon />
+            <ConnectWallet inline={isMobileScreen} />
+          </header>
+        </>
       }
     >
       <section className={classes.mainSection}>
