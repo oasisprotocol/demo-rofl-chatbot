@@ -83,6 +83,7 @@ export const ConnectWallet: FC<Props> = ({ inline }) => {
             className={StringUtils.clsx(classes.connectWalletBtn, inline ? classes.inline : undefined)}
             color="primary"
             disabled={isLoading}
+            size={inline ? 'small' : 'medium'}
           >
             Install MetaMask
           </Button>
@@ -94,6 +95,7 @@ export const ConnectWallet: FC<Props> = ({ inline }) => {
           color="primary"
           disabled={isLoading}
           onClick={handleSwitchNetwork}
+          size={inline ? 'small' : 'medium'}
         >
           Switch Network
         </Button>
@@ -104,6 +106,7 @@ export const ConnectWallet: FC<Props> = ({ inline }) => {
           color="primary"
           disabled={isLoading}
           onClick={handleConnectWallet}
+          size={inline ? 'small' : 'medium'}
         >
           Connect wallet
         </Button>
