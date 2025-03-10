@@ -7,6 +7,7 @@ const appStateProviderInitialState: AppStateProviderState = {
   appError: '',
   isMobileScreen: false,
   isDesktopScreen: false,
+  showFaucetNotification: true,
 }
 
 export const AppStateContextProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -39,10 +40,18 @@ export const AppStateContextProvider: FC<PropsWithChildren> = ({ children }) => 
     }))
   }
 
+  const setShowFaucetNotification = (showFaucetNotification: boolean) => {
+    setState(prevState => ({
+      ...prevState,
+      showFaucetNotification,
+    }))
+  }
+
   const providerState: AppStateProviderContext = {
     state,
     setAppError,
     clearAppError,
+    setShowFaucetNotification,
   }
 
   return <AppStateContext.Provider value={providerState}>{children}</AppStateContext.Provider>

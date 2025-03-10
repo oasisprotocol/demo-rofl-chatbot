@@ -1,10 +1,12 @@
 .notification {
   position: sticky;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   z-index: 999;
   margin: 0 auto;
   max-width: 620px;
-  display: flex;
-  padding: 1rem;
+  padding: 1rem 3rem 1rem 1rem;
   border-radius: 0.25rem;
   background: var(--gray);
   color: var(--brand-extra-dark);
@@ -26,6 +28,18 @@
 .mainSection {
   display: grid;
   width: 100%;
+}
+
+.closeIcon {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--black);
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
 @media screen and (max-width: 1000px) {
