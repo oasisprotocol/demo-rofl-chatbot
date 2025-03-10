@@ -27,7 +27,7 @@ export interface Web3ProviderContext {
   getTransaction: (txHash: string) => Promise<TransactionResponse | null>
   getGasPrice: () => Promise<bigint>
   isProviderAvailable: () => Promise<boolean>
-  getPromptsAnswers: () => Promise<PromptsAnswers>
+  getPromptsAnswers: () => Promise<PromptsAnswers | null>
   ask: (prompt: string) => Promise<void>
   clear: () => Promise<void>
 }

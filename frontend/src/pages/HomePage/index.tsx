@@ -1,4 +1,4 @@
-import { FC, KeyboardEventHandler, useEffect, useState, Fragment } from 'react'
+import { FC, KeyboardEventHandler, useEffect, useState, Fragment, useRef } from 'react'
 import Markdown from 'react-markdown'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
@@ -14,17 +14,18 @@ import { retry } from '../../utils/retry'
 
 export const HomePage: FC = () => {
   const {
-    state: { isConnected, isInteractingWithChain },
+    state: { isConnected, isInteractingWithChain, authInfo },
     getPromptsAnswers: web3GetPromptsAnswers,
     ask: web3Ask,
     clear: web3Clear,
   } = useWeb3()
   const [isWaitingChatBot, setIsWaitingChatBot] = useState(false)
-  const [conversation, setConversation] = useState<PromptsAnswers | null>(null)
+  const [conversation, setConversation] = useState<PromptsAnswers | null | undefined>(null)
   const [conversationError, setConversationError] = useState<string | null>(null)
   const [promptValue, setPromptValue] = useState<string>('')
   const [promptValueError, setPromptValueError] = useState<string>()
   const [tempPrompt, setTempPrompt] = useState<string | null>(null)
+  const retryAbortControllerRef = useRef<AbortController | null>()
 
   const fetchConversation = async () => {
     setConversationError(null)
@@ -42,11 +43,24 @@ export const HomePage: FC = () => {
   }
 
   useEffect(() => {
+    if (!authInfo) {
+      setConversation(undefined)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authInfo])
+
+  useEffect(() => {
+    if (retryAbortControllerRef.current && !retryAbortControllerRef.current.signal.aborted) {
+      retryAbortControllerRef.current.abort()
+      setIsWaitingChatBot(false)
+      setTempPrompt(null)
+    }
+
     if (isConnected) {
       fetchConversation()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected])
+  }, [isConnected, authInfo])
 
   const handleAsk = async () => {
     if (isWaitingChatBot) return
@@ -59,6 +73,8 @@ export const HomePage: FC = () => {
       return
     }
 
+    retryAbortControllerRef.current = new AbortController()
+
     try {
       await web3Ask(promptValue)
 
@@ -70,26 +86,35 @@ export const HomePage: FC = () => {
         web3GetPromptsAnswers,
         _conversation => {
           // Take one prompt in the future, or take the latest one submitted
-          const lastPromptId = Math.max(conversation?.prompts.length ?? 0, _conversation.prompts.length - 1)
+          const lastPromptId = Math.max(
+            conversation?.prompts.length ?? 0,
+            (_conversation?.prompts.length ?? 0) - 1
+          )
 
-          if (_conversation.answers.find(({ promptId }) => lastPromptId === promptId)) {
+          if (_conversation?.answers.find(({ promptId }) => lastPromptId === promptId)) {
             return _conversation
           }
 
           throw new Error('Conversation has not been updated!')
         },
         50,
-        6000
+        6000,
+        retryAbortControllerRef.current?.signal
       )
-      setConversation(promptsAnswers)
 
-      setTempPrompt(null)
-      setPromptValue('')
+      if (!retryAbortControllerRef.current?.signal.aborted) {
+        setConversation(promptsAnswers)
+        setTempPrompt(null)
+        setPromptValue('')
+      }
     } catch (ex) {
-      setPromptValue(promptValue)
-      setPromptValueError((ex as Error).message)
+      if (!retryAbortControllerRef.current?.signal.aborted) {
+        setPromptValue(promptValue)
+        setPromptValueError((ex as Error).message)
+      }
     } finally {
       setIsWaitingChatBot(false)
+      retryAbortControllerRef.current = null
     }
   }
 
@@ -135,7 +160,12 @@ export const HomePage: FC = () => {
         {isConnected && (
           <div className={classes.cardContent}>
             <div className={classes.conversation}>
-              {!conversation?.prompts.length && !tempPrompt && (
+              {conversation === undefined && (
+                <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
+                  <div>Approve signature request, in order to view conversation history</div>
+                </div>
+              )}
+              {conversation && !conversation.prompts.length && !tempPrompt && (
                 <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
                   <div>No conversation history available</div>
                 </div>
