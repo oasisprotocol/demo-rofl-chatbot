@@ -20,7 +20,7 @@ export const HomePage: FC = () => {
     clear: web3Clear,
   } = useWeb3()
   const [isWaitingChatBot, setIsWaitingChatBot] = useState(false)
-  const [conversation, setConversation] = useState<PromptsAnswers | null>(null)
+  const [conversation, setConversation] = useState<PromptsAnswers | null | undefined>(null)
   const [conversationError, setConversationError] = useState<string | null>(null)
   const [promptValue, setPromptValue] = useState<string>('')
   const [promptValueError, setPromptValueError] = useState<string>()
@@ -41,6 +41,13 @@ export const HomePage: FC = () => {
       throw ex
     }
   }
+
+  useEffect(() => {
+    if (!authInfo) {
+      setConversation(undefined)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authInfo])
 
   useEffect(() => {
     if (retryAbortControllerRef.current && !retryAbortControllerRef.current.signal.aborted) {
@@ -153,7 +160,12 @@ export const HomePage: FC = () => {
         {isConnected && (
           <div className={classes.cardContent}>
             <div className={classes.conversation}>
-              {!conversation?.prompts.length && !tempPrompt && (
+              {conversation === undefined && (
+                <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
+                  <div>Approve signature request, in order to view conversation history</div>
+                </div>
+              )}
+              {conversation && !conversation.prompts.length && !tempPrompt && (
                 <div className={StringUtils.clsx(classes.bubble, classes.alert)}>
                   <div>No conversation history available</div>
                 </div>
