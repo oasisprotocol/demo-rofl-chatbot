@@ -104,10 +104,3 @@
   width: 100%;
   resize: none;
 }
-
-@media screen and (max-width: 1000px) {
-  .conversation {
-    flex: 1 1 300px;
-    max-height: 300px;
-  }
-}

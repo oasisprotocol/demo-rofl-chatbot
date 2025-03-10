@@ -12,15 +12,16 @@ import { VITE_NETWORK } from '../../constants/config'
 
 export const Layout: FC = () => {
   const {
-    state: { appError, isMobileScreen },
+    state: { appError, isMobileScreen, showFaucetNotification },
     clearAppError,
+    setShowFaucetNotification,
   } = useAppState()
 
   return (
     <LayoutBase
       header={
         <>
-          {(VITE_NETWORK === 23293n || VITE_NETWORK === 23295n) && (
+          {(VITE_NETWORK === 23293n || VITE_NETWORK === 23295n) && showFaucetNotification && (
             <div className={classes.notification}>
               <p>
                 Don't have any TEST tokens on Sapphire Testnet? Get some from our{' '}
@@ -32,6 +33,14 @@ export const Layout: FC = () => {
                   Testnet faucet
                 </a>
               </p>
+
+              <button
+                className={classes.closeIcon}
+                onClick={() => setShowFaucetNotification(false)}
+                aria-label="Close notification"
+              >
+                &times;
+              </button>
             </div>
           )}
           <header className={classes.header}>
