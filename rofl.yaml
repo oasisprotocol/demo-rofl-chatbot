@@ -1,5 +1,8 @@
 name: demo-rofl-chatbot
 version: 0.1.0
+repository: https://github.com/oasisprotocol/demo-rofl-chatbot
+author: Matevž Jekovec <matevz@oasisprotocol.org>
+license: Apache-2.0
 tee: tdx
 kind: container
 resources:
