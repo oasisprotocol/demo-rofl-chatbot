@@ -8,7 +8,10 @@ services:
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
 
   oracle:
+    build:
+      dockerfile: ./oracle.Dockerfile
     image: "ghcr.io/oasisprotocol/demo-rofl-chatbot:latest@sha256:b62206f22871ea506e2a3d1db5bfbc8f9c15c68279708a0d5f845a1654f9712f"
+    platform: linux/amd64
     entrypoint: /bin/sh -c 'python main.py --network https://testnet.sapphire.oasis.io --ollama-address http://ollama:11434 0xcD0F0eFfAFAe5F5439f24F01ab69b2CBaC14cC56'
     restart: on-failure
     volumes:
