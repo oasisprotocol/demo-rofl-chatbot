@@ -7,7 +7,7 @@ tee: tdx
 kind: container
 resources:
   memory: 16384
-  cpus: 4
+  cpus: 8
   storage:
     kind: disk-persistent
     size: 10000
@@ -16,7 +16,7 @@ artifacts:
   kernel: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.4.1/stage1.bin#06e12cba9b2423b4dd5916f4d84bf9c043f30041ab03aa74006f46ef9c129d22
   stage2: https://github.com/oasisprotocol/oasis-boot/releases/download/v0.4.1/stage2-podman.tar.bz2#6f2487aa064460384309a58c858ffea9316e739331b5c36789bb2f61117869d6
   container:
-    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.4.1/rofl-containers#bdd2735af9ff10c9b1c1e8db535f4751739bd3707600c57b81e80195e6207673
+    runtime: https://github.com/oasisprotocol/oasis-sdk/releases/download/rofl-containers%2Fv0.5.0/rofl-containers#800be74e543f1d10d12ef6fadce89dd0a0ce7bc798dbab4f8d7aa012d82fbff1
     compose: compose.yaml
 deployments:
   default:
@@ -34,8 +34,8 @@ deployments:
           min_tcb_evaluation_data_number: 17
           tdx: {}
       enclaves:
-        - YjeeznQx9i/UQKVoPcOVT3P5oxOHGJ6r1VwMBetuSREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - IyVddKd5AtSGmo7FHnZrj0vIzfIOp3DMBFHwUbb0qVQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: r73zDIRsJ23opSYJ1r9LXhpivvM4QFAAJKcgmjQLaTwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: yvZEDsBeQ4pERD7zi9zcnMWFN04gB7YYuaGfPB8TAhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - any: {}
       fees: endorsing_node
