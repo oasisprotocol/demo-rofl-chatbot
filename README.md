@@ -129,9 +129,18 @@ The easiest way to spin up all components described above is to use:
 [Podman]: https://podman.io/
 [Podman Compose]: https://github.com/containers/podman-compose
 
+To install latest stable version on Ubuntu you can use `brewlinux`:
+```shell
+sudo apt-get remove crun podman
+brew install podman
+brew install crun podman
+pip3 install podman-compose
+```
+
 ### Localnet deployment
 
 ```shell
+mkdir -p ./contracts/out ./contracts/cache && chmod -R 777 ./contracts
 podman-compose -f compose.localnet.yaml up
 ```
 
