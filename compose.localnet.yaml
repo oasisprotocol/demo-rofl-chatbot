@@ -7,7 +7,7 @@ services:
       - ~/ollama-storage:/root/.ollama
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
 
-  "sapphire-localnet":
+  sapphire-localnet:
     image: "ghcr.io/oasisprotocol/sapphire-localnet"
     platform: "linux/x86_64"
     ports:
@@ -24,7 +24,7 @@ services:
       - ./contracts:/contracts
     entrypoint: /bin/sh -c 'cd contracts && forge create --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://sapphire-localnet:8545 --broadcast ChatBot --constructor-args localhost 00d795c033fb4b94873d81b6327f5371768ffc6fcf 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
     depends_on:
-      "sapphire-localnet":
+      sapphire-localnet:
         condition: service_healthy
 
   oracle:
