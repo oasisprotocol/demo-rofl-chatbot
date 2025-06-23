@@ -49,7 +49,7 @@ class RoflUtility:
                     "data": tx["data"].lstrip("0x"),
                 },
             },
-            "encrypted": False,
+            "encrypt": False,
         }
 
         path = '/rofl/v1/tx/sign-submit'
