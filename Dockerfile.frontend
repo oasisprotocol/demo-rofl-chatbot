@@ -1,5 +1,5 @@
 FROM ghcr.io/foundry-rs/foundry:latest AS contracts-build
-COPY ./contracts /contracts
+COPY --chown=foundry ./contracts /contracts
 RUN cd /contracts && forge build
 
 FROM node:21-alpine3.19
