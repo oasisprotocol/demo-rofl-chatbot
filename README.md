@@ -129,7 +129,6 @@ The easiest way to spin up all components described above is to use:
 [Podman]: https://podman.io/
 [Podman Compose]: https://github.com/containers/podman-compose
 
-
 ### Localnet deployment
 
 ```shell
