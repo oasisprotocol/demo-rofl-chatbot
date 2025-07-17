@@ -44,9 +44,9 @@ class RoflUtility:
                 "kind": "eth",
                 "data": {
                     "gas_limit": tx["gas"],
-                    "to": tx["to"].lstrip("0x"),
+                    "to": tx["to"].removeprefix("0x"),
                     "value": tx["value"],
-                    "data": tx["data"].lstrip("0x"),
+                    "data": tx["data"].removeprefix("0x"),
                 },
             },
             "encrypt": False,
