@@ -4,3 +4,4 @@ pytest
 oasis-sapphire-py
 ollama
 httpx
+cbor2

@@ -54,4 +54,4 @@ class RoflUtility:
 
         path = '/rofl/v1/tx/sign-submit'
 
-        return self._appd_post(path, payload)
+        return self._appd_post(path, payload)["data"]

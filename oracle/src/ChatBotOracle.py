@@ -1,5 +1,6 @@
 import asyncio
-import requests
+import cbor2
+import codecs
 
 from ollama import Client, ChatResponse
 
@@ -27,10 +28,12 @@ class ChatBotOracle:
         if  contract_addr != self.w3.eth.default_account:
             print(f"Contract oracle {contract_addr} does not match our address {self.w3.eth.default_account}, updating...",)
             tx_params = self.contract.functions.setOracle(self.w3.eth.default_account).build_transaction({'gasPrice': self.w3.eth.gas_price})
-            tx_hash = self.rofl_utility.submit_tx(tx_params)
-            print(f"Got receipt {tx_hash} {dir(tx_hash)}")
-            tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
-            print(f"Updated. Transaction hash: {tx_receipt.transactionHash.hex()}")
+            call_result_hex = self.rofl_utility.submit_tx(tx_params)
+            call_result = cbor2.loads(codecs.decode(call_result_hex, "hex"))
+            if 'ok' in call_result:
+                print(f"Successfully updated oracle address.")
+            else:
+                print(f"Failed to update oracle address: {call_result}")
         else:
             print(f"Contract oracle {contract_addr} matches our address {self.w3.eth.default_account}")
 
