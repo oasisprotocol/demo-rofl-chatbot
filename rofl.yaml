@@ -6,8 +6,8 @@ license: Apache-2.0
 tee: tdx
 kind: container
 resources:
-  memory: 16384
-  cpus: 8
+  memory: 4096
+  cpus: 2
   storage:
     kind: disk-persistent
     size: 10000
@@ -24,6 +24,7 @@ deployments:
     network: testnet
     paratime: sapphire
     admin: dave
+    oci_repository: rofl.sh/304d6696-38bb-4176-8671-83c3313fec52:1752855498
     trust_root:
       height: 25327057
       hash: 40c0672323c8e314090e95800a597a5d587e41a9b149cc5d7b0aeb8f8794b9f7
@@ -34,9 +35,14 @@ deployments:
           min_tcb_evaluation_data_number: 17
           tdx: {}
       enclaves:
-        - id: XIJYBT4EHM7v5a4x7D+F9QgL88m+CpNPCItYvZ4tALsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - id: rTTY+55JXK7uYtyjeZGP7qirmtbiJmx6cO1EY+mYLhUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: gm16qiQmOFdoCDjcrAxUPNbAW8R3sJk5fyxMx3vhGPYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: Zk5n+bu6NxJigd+0FnT0LUisWt3vpXgZMyJHYgJQOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - any: {}
       fees: endorsing_node
       max_expiration: 3
+    machines:
+      default:
+        provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz
+        offer: playground_short
+        id: "00000000000001e3"
