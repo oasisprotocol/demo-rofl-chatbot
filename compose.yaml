@@ -1,8 +1,6 @@
 services:
   ollama:
     image: "docker.io/ollama/ollama"
-    ports:
-      - "11434:11434"
     volumes:
       - ollama-storage:/root/.ollama
     entrypoint: ["/usr/bin/bash", "-c", "/bin/ollama serve & sleep 5; ollama pull deepseek-r1:1.5b; wait"]
