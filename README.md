@@ -136,7 +136,9 @@ podman-compose -f compose.localnet.yaml up
 ```
 
 Once all containers are up and running, open your web browser at
-`http://localnet:5173`.
+`http://localhost:5173`. You may also want to check out the Localnet block
+explorer at `http://localhost:8548` or connect to ollama instance directly at
+`http://localhost:11434`.
 
 ### Testnet deployment
 
